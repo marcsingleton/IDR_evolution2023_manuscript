@@ -1,5 +1,4 @@
 # Top level directories
-/build/
 /src*
 
 # All directories
@@ -11,5 +10,4 @@ out*/
 
 # Special cases
 .gitignore
-/chapter1/orthology_inference
-/chapter2/IDR_evolution
+/IDR_evolution
