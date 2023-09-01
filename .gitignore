@@ -1,5 +1,6 @@
 # Top level directories
 /src*
+/docs*
 
 # All directories
 out*/
