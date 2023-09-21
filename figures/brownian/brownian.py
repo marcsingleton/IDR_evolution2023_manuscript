@@ -11,9 +11,9 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import ArrowStyle
 from matplotlib.transforms import blended_transform_factory
 from sklearn.decomposition import PCA
-from src2.brownian.pca import add_pca_arrows
-from src2.draw import plot_msa
-from src2.utils import read_fasta
+from src.brownian.pca import add_pca_arrows
+from src.draw import plot_msa
+from src.utils import read_fasta
 
 
 def zscore(df):

@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 import skbio
 from matplotlib.patches import Patch
-from src2.draw import plot_msa_data
-from src2.phylo import get_brownian_weights
-from src2.utils import read_fasta
+from src.draw import plot_msa_data
+from src.phylo import get_brownian_weights
+from src.utils import read_fasta
 
 
 def load_scores(path):

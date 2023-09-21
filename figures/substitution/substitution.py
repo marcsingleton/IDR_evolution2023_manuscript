@@ -9,7 +9,7 @@ import numpy as np
 import skbio
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
-from src2.utils import read_iqtree, read_paml
+from src.utils import read_iqtree, read_paml
 
 dpi = 300
 

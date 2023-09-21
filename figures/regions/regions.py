@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.stats as stats
 from numpy import linspace, sqrt
-from src2.utils import read_fasta
+from src.utils import read_fasta
 
 pdidx = pd.IndexSlice
 ppid_regex = r'ppid=([A-Za-z0-9_.]+)'

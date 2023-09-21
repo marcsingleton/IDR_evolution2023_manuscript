@@ -8,8 +8,8 @@ import pandas as pd
 from matplotlib.patches import Patch, Rectangle
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import pdist
-from src2.brownian.linkage import make_tree
-from src2.draw import plot_tree
+from src.brownian.linkage import make_tree
+from src.draw import plot_tree
 
 pdidx = pd.IndexSlice
 min_length = 30
