@@ -76,9 +76,7 @@ for column_label, group_label in zip(column_labels, group_labels):
 
 columns = {}
 for feature_label in feature_labels:
-    columns[f'{feature_label}_AIC_BM'] = 2 * (2 - models[f'{feature_label}_loglikelihood_BM'])
-    columns[f'{feature_label}_AIC_OU'] = 2 * (3 - models[f'{feature_label}_loglikelihood_OU'])
-    columns[f'{feature_label}_delta_AIC'] = columns[f'{feature_label}_AIC_BM'] - columns[f'{feature_label}_AIC_OU']
+    columns[f'{feature_label}_delta_loglikelihood'] = models[f'{feature_label}_loglikelihood_OU'] - models[f'{feature_label}_loglikelihood_BM']
     columns[f'{feature_label}_sigma2_ratio'] = models[f'{feature_label}_sigma2_BM'] / models[f'{feature_label}_sigma2_OU']
 models = pd.concat([models, pd.DataFrame(columns)], axis=1)
 
@@ -127,7 +125,7 @@ gridspec_kw = {'width_ratios': [0.1, 0.65, 0.25], 'wspace': 0,
 
 column_labels = []
 for group_label in group_labels:
-    column_labels.extend([f'{feature_label}_delta_AIC' for feature_label in feature_groups[group_label]])
+    column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
 data = models.loc[pdidx[:, :, :, True], column_labels]  # Re-arrange columns
 array = np.nan_to_num(data.to_numpy(), nan=1)
 
@@ -210,7 +208,7 @@ width = 0.2
 ycenter = gridspec_kw['bottom'] / 2
 height = 0.015
 cax = fig.add_axes((xcenter - width / 2, ycenter - height / 2, width, height))
-cax.set_title('$\mathregular{AIC_{BM} - AIC_{OU}}$', fontdict={'fontsize': 10})
+cax.set_title('$\mathregular{\log L_{OU} - \log L_{BM}}$', fontdict={'fontsize': 10})
 fig.colorbar(im, cax=cax, orientation='horizontal')
 
 fig.savefig(f'out/hierarchy.png', dpi=600)
