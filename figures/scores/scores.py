@@ -76,7 +76,7 @@ for panel_OGid, panel_start, panel_stop in panel_records:
 
     # Get missing segments
     ppid2missing = {}
-    with open(f'../../IDR_evolution/data/alignments/missing/{panel_OGid}.tsv') as file:
+    with open(f'../../IDR_evolution/data/alignments/missing_trim/{panel_OGid}.tsv') as file:
         field_names = file.readline().rstrip('\n').split('\t')
         for line in file:
             fields = {key: value for key, value in zip(field_names, line.rstrip('\n').split('\t'))}
@@ -91,7 +91,7 @@ for panel_OGid, panel_start, panel_stop in panel_records:
     aligned_scores = np.full((len(msa), len(msa[0]['seq'])), np.nan)
     for i, record in enumerate(msa):
         ppid, seq = record['ppid'], record['seq']
-        scores = load_scores(f'../../IDR_evolution/analysis/IDRpred/get_scores/out/{panel_OGid}/{ppid}.diso_noprof')  # Remove anything after trailing .
+        scores = load_scores(f'../../IDR_evolution/analysis/IDRpred/score_compute/out/{panel_OGid}/{ppid}.diso_noprof')  # Remove anything after trailing .
         idx = 0
         for j, sym in enumerate(seq):
             if sym not in ['-', '.']:
@@ -183,15 +183,15 @@ for panel_OGid, panel_start, panel_stop in panel_records:
     all_segments = pd.DataFrame(rows)
     all_regions = all_segments.drop('ppid', axis=1).drop_duplicates()
 
-    feature_roots = pd.read_table(f'../../IDR_evolution/analysis/brownian/get_contrasts/out/features/roots_{min_length}.tsv', header=[0, 1])
+    feature_roots = pd.read_table(f'../../IDR_evolution/analysis/brownian/contrast_compute/out/features/roots_{min_length}.tsv', header=[0, 1])
     feature_labels = [feature_label for feature_label, group_label in feature_roots.columns if group_label != 'ids_group']
     nonmotif_labels = [feature_label for feature_label, group_label in feature_roots.columns if group_label not in ['ids_group', 'motifs_group']]
 
-    feature_contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/get_contrasts/out/features/contrasts_{min_length}.tsv', skiprows=[1])  # Skip group row
+    feature_contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/contrast_compute/out/features/contrasts_{min_length}.tsv', skiprows=[1])  # Skip group row
     feature_contrasts = all_regions.merge(feature_contrasts, how='left', on=['OGid', 'start', 'stop'])
     feature_contrasts = feature_contrasts.set_index(['OGid', 'start', 'stop', 'disorder', 'contrast_id'])
 
-    score_contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/get_contrasts/out/scores/contrasts_{min_length}.tsv')
+    score_contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/contrast_compute/out/scores/contrasts_{min_length}.tsv')
     score_contrasts = all_regions.merge(score_contrasts, how='left', on=['OGid', 'start', 'stop'])
     score_contrasts = score_contrasts.set_index(['OGid', 'start', 'stop', 'disorder', 'contrast_id'])
 
@@ -278,7 +278,7 @@ with open(f'../../IDR_evolution/analysis/IDRpred/region_filter/out/regions_{min_
         rows.append({'OGid': OGid, 'start': start, 'stop': stop, 'disorder': disorder})
 all_regions = pd.DataFrame(rows)
 
-contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/get_contrasts/out/scores/contrasts_{min_length}.tsv')
+contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/contrast_compute/out/scores/contrasts_{min_length}.tsv')
 contrasts = all_regions.merge(contrasts, how='left', on=['OGid', 'start', 'stop'])
 contrasts = contrasts.set_index(['OGid', 'start', 'stop', 'disorder', 'contrast_id'])
 

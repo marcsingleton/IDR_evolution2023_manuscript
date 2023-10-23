@@ -71,7 +71,7 @@ tree_template = skbio.read('../../IDR_evolution/data/trees/consensus_LG/100R_NI.
 tip_order = {tip.name: i for i, tip in enumerate(tree_template.tips())}
 
 # Load features
-all_features = pd.read_table('../../IDR_evolution/analysis/brownian/get_features/out/features.tsv', header=[0, 1])
+all_features = pd.read_table('../../IDR_evolution/analysis/brownian/feature_compute/out/features.tsv', header=[0, 1])
 all_features.loc[all_features[('kappa', 'charge_group')] == -1, 'kappa'] = 1  # Need to specify full column index to get slicing to work
 all_features.loc[all_features[('omega', 'charge_group')] == -1, 'omega'] = 1
 all_features['length'] = all_features['length'] ** 0.6
@@ -106,11 +106,11 @@ features = features.groupby(['OGid', 'start', 'stop', 'disorder']).mean()
 features = all_regions.merge(features, how='left', on=['OGid', 'start', 'stop', 'disorder'])
 features = features.set_index(['OGid', 'start', 'stop', 'disorder'])
 
-roots = pd.read_table(f'../../IDR_evolution/analysis/brownian/get_contrasts/out/features/roots_{min_length}.tsv', skiprows=[1])  # Skip group row
+roots = pd.read_table(f'../../IDR_evolution/analysis/brownian/contrast_compute/out/features/roots_{min_length}.tsv', skiprows=[1])  # Skip group row
 roots = all_regions.merge(roots, how='left', on=['OGid', 'start', 'stop'])
 roots = roots.set_index(['OGid', 'start', 'stop', 'disorder'])
 
-contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/get_contrasts/out/features/contrasts_{min_length}.tsv', skiprows=[1])  # Skip group row
+contrasts = pd.read_table(f'../../IDR_evolution/analysis/brownian/contrast_compute/out/features/contrasts_{min_length}.tsv', skiprows=[1])  # Skip group row
 contrasts = all_regions.merge(contrasts, how='left', on=['OGid', 'start', 'stop'])
 contrasts = contrasts.set_index(['OGid', 'start', 'stop', 'disorder', 'contrast_id'])
 
