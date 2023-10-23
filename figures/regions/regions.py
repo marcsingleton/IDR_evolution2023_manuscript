@@ -95,7 +95,9 @@ with open('out/utest.txt', 'w') as file:
 
 subfig = fig.add_subfigure(gs[0, 1])
 ax = subfig.subplots()
-ax.boxplot([x1, x2], labels=['disorder', 'order'])
+ax.violinplot([x1, x2], showmedians=True)
+ax.set_xmargin(0.2)
+ax.set_xticks([1, 2], ['disorder', 'order'])
 ax.set_ylabel('Total substitution rate')
 subfig.suptitle('B', x=0.025, y=0.975, fontweight='bold')
 
