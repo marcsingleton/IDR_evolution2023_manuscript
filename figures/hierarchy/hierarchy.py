@@ -135,6 +135,12 @@ lm = linkage(cdm, method='average')
 # Convert to tree and calculate some useful data structures
 tree = make_tree(lm)
 tip_order = [int(tip.name) for tip in tree.tips()]
+cluster_nodes = set()
+for root_id, _, _ in clusters:
+    root_node = tree.find(root_id)
+    cluster_nodes.update(root_node.traverse())
+
+# Get branch colors
 node2color, node2tips = {}, {}
 for node in tree.postorder():
     if node.is_tip():
@@ -142,7 +148,11 @@ for node in tree.postorder():
     else:
         tips = sum([node2tips[child] for child in node.children])
     node2tips[node] = tips
-    node2color[node] = str(max(0, (11 - tips) / 10))
+    if node in cluster_nodes:
+        cmap = plt.colormaps['Reds_r']
+    else:
+        cmap = plt.colormaps['Greys_r']
+    node2color[node] = cmap(max(0., (11 - tips) / 10))
 
 fig, axs = plt.subplots(2, 3, figsize=(7.5, 7.5), gridspec_kw=gridspec_kw)
 
