@@ -2,11 +2,17 @@
 \includegraphics[width=\textwidth]{regions/out/regions.png}
 \centering
 \caption{\textbf{Summary statistics of disorder and order regions.}
-\textbf{(A)} Distribution of mean lengths of regions. \textbf{(B)} Boxplot of the sums of the average amino acid and indel substitution rates in the disorder and order regions. The substitution rates are significantly greater in the disorder regions than in the order regions ($p < 1 \times 10^{-10}$, Mann-Whitney \textit{U} test).}
+\textbf{(A)} Distribution of mean lengths of regions. \textbf{(B)} Violin plot of the sums of the average amino acid and indel substitution rates in the disorder and order regions. The substitution rates are significantly greater in the disorder regions than in the order regions ($p < 1 \times 10^{-10}$, Mann-Whitney \textit{U} test).}
 \label{sfig:regions}
 \end{figure}
 
-% TODO: Add Pfam overlap figure
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{pfam/out/pfam.png}
+\centering
+\caption{\textbf{Overlap of disorder and order regions with Pfam domains.}
+\textbf{(A)} Number of disorder and order regions with zero and non-zero overlap with any Pfam domain. \textbf{(B)} Histogram of the disorder and order regions' overlaps with any Pfam domain. Regions with zero overlap are excluded to more clearly show the distribution.}
+\label{sfig:pfam}
+\end{figure}
 
 \begin{figure}[h!]
 \includegraphics[width=\textwidth]{substitution/out/heatmap_ematrix.png}
