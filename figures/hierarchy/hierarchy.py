@@ -18,18 +18,18 @@ min_indel_columns = 5  # Indel rates below this value are set to 0
 min_aa_rate = 1
 min_indel_rate = 0.1
 
-clusters = [('15086', 'A', 'extracellular structure'),
-            ('15170', 'B', 'Wnt signaling'),
-            ('15160', 'C', ''),
-            ('15070', 'D', 'nuclear pore organization'),
-            ('14415', 'E', 'voltage gated channel'),
-            ('15217', 'F', 'nuclear transport'),
-            ('15078', 'G', 'nucleotide transport'),
-            ('15021', 'H', 'cell cycle regulation'),
-            ('15161', 'I', 'synaptic signaling regulation'),
-            ('15191', 'J', 'histone methylation'),
-            ('15143', 'K', ''),
-            ('14937', 'L', 'chromatin assembly')]
+clusters = [('15150', 'A', ''),
+            ('15107', 'B', ''),
+            ('15104', 'C', ''),
+            ('15056', 'D', ''),
+            ('14889', 'E', ''),
+            ('15053', 'F', ''),
+            ('15072', 'G', ''),
+            ('14741', 'H', ''),
+            ('14379', 'I', ''),
+            ('15123', 'J', ''),
+            ('15153', 'K', ''),
+            ('14916', 'L', '')]
 
 color1 = '#4e79a7'
 
@@ -132,7 +132,7 @@ array = np.nan_to_num(data.to_numpy(), nan=1)
 cdm = pdist(array, metric='correlation')
 lm = linkage(cdm, method='average')
 
-# Convert to tree and get branch colors
+# Convert to tree and calculate some useful data structures
 tree = make_tree(lm)
 tip_order = [int(tip.name) for tip in tree.tips()]
 node2color, node2tips = {}, {}
