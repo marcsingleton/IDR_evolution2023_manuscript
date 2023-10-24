@@ -4,6 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from scipy.stats import chi2_contingency
 
 df = pd.read_table('../../IDR_evolution/analysis/IDRpred/pfam_overlap/out/overlaps.tsv')
 df['fraction'] = df['overlap'] / df['length']
@@ -54,3 +55,17 @@ subfig.suptitle('B', x=0.025, y=0.975, fontweight='bold')
 fig.savefig('out/pfam.png', dpi=300)
 fig.savefig('out/pfam.tiff', dpi=300)
 plt.close()
+
+# Chi-squared test
+hs_disorder = [(disorder['fraction'] == 0).sum(), (disorder['fraction'] != 0).sum()]
+hs_order = [(order['fraction'] == 0).sum(), (order['fraction'] != 0).sum()]
+hs_stack = list(zip(hs_disorder, hs_order))
+
+chi2, p, dof, expected = chi2_contingency(hs_stack)
+output = f"""\
+chi2: {chi2}
+p: {p}
+dof: {dof}
+"""
+with open('out/chi2.txt', 'w') as file:
+    file.write(output)
