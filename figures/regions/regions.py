@@ -63,7 +63,8 @@ if not os.path.exists('out/'):
 fig = plt.figure(figsize=(7.5, 3.5))
 gs = plt.GridSpec(1, 2)
 
-# Mean region length histogram
+# === MAIN FIGURE ===
+# --- PANEL A: MEAN REGION LENGTH HISTOGRAM ---
 subfig = fig.add_subfigure(gs[0, 0])
 axs = subfig.subplots(2, 1, sharex=True, gridspec_kw={'left': 0.2, 'bottom': 0.15})
 xmin, xmax = means['length'].min(), means['length'].max()
@@ -75,7 +76,7 @@ for ax in axs:
     ax.legend()
 subfig.suptitle('A', x=0.025, y=0.975, fontweight='bold')
 
-# ASR rate boxplot
+# --- PANEL B: ASR RATE BOXPLOT ---
 x1 = (asr_rates.loc[asr_rates['disorder'] == True, 'aa_rate_mean'] +
       asr_rates.loc[asr_rates['disorder'] == True, 'indel_rate_mean']).dropna()
 x2 = (asr_rates.loc[asr_rates['disorder'] == False, 'aa_rate_mean'] +

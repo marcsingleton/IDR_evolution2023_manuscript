@@ -17,7 +17,8 @@ if not os.path.exists('out/'):
 fig = plt.figure(figsize=(7.5, 3.5))
 gs = plt.GridSpec(1, 2)
 
-# PANEL A: Bar charts
+# === MAIN FIGURE ===
+# --- PANEL A: Bar charts ---
 hs_disorder = [(disorder['fraction'] == 0).sum(), (disorder['fraction'] != 0).sum()]
 hs_order = [(order['fraction'] == 0).sum(), (order['fraction'] != 0).sum()]
 hs_stack = list(zip(hs_disorder, hs_order))
@@ -41,7 +42,7 @@ ax.set_ylabel('Number of regions')
 ax.legend()
 subfig.suptitle('A', x=0.025, y=0.975, fontweight='bold')
 
-# PANEL B Histograms of non-zero overlap
+# --- PANEL B: Histograms of non-zero overlap ---
 subfig = fig.add_subfigure(gs[0, 1])
 axs = subfig.subplots(2, gridspec_kw={'bottom': 0.15})
 axs[0].hist(disorder.loc[disorder['fraction'] != 0, 'fraction'], bins=50, label='disorder', color='C0')
@@ -56,7 +57,7 @@ fig.savefig('out/pfam.png', dpi=300)
 fig.savefig('out/pfam.tiff', dpi=300)
 plt.close()
 
-# Chi-squared test
+# === CHI-SQUARED TEST ===
 hs_disorder = [(disorder['fraction'] == 0).sum(), (disorder['fraction'] != 0).sum()]
 hs_order = [(order['fraction'] == 0).sum(), (order['fraction'] != 0).sum()]
 hs_stack = list(zip(hs_disorder, hs_order))

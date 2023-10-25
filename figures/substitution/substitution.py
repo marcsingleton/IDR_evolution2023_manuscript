@@ -72,7 +72,7 @@ for label, record in records.items():
                             record.freqs[:, ix],
                             record.length)
 
-# MAIN FIGURE
+# === MAIN FIGURE ===
 plots = [(records['50R_disorder'], records['50R_order'], 'ematrix', 'exchangeability', 'B'),
          (records['50R_disorder'], records['50R_order'], 'rmatrix', 'rate', 'C')]
 
@@ -132,7 +132,7 @@ fig.savefig('out/substitution.png', dpi=dpi)
 fig.savefig('out/substitution.tiff', dpi=dpi)
 plt.close()
 
-# HEATMAP
+# === HEATMAP ===
 plots = [('ematrix', 'exchangeability'),
          ('rmatrix', 'rate')]
 for data_label, title_label in plots:
@@ -149,7 +149,7 @@ for data_label, title_label in plots:
     fig.savefig(f'out/heatmap_{data_label}.tiff', dpi=dpi)
     plt.close()
 
-# CORRELATION GRID
+# === CORRELATION GRID ===
 fig = plt.figure(figsize=(7.5, 3))
 gs = plt.GridSpec(1, 2)
 rect = (0.25, 0.1, 0.55, 0.85)
@@ -179,7 +179,7 @@ fig.savefig(f'out/heatmap_corr.png', dpi=dpi)
 fig.savefig(f'out/heatmap_corr.tiff', dpi=dpi)
 plt.close()
 
-# VARIATION
+# === VARIATION ===
 plots = [(records['50R_disorder'], records['50R_order'], 'ematrix'),
          (records['50R_disorder'], records['50R_order'], 'rmatrix')]
 for record1, record2, data_label in plots:

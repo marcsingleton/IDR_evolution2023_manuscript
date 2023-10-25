@@ -83,7 +83,7 @@ models = pd.concat([models, pd.DataFrame(columns)], axis=1)
 if not os.path.exists('out/'):
     os.mkdir('out/')
 
-# ASR rate histogram with cutoff
+# === ASR RATE HISTOGRAM ===
 fig = plt.figure(figsize=(7.5, 3))
 gs = plt.GridSpec(1, 2)
 rect = (0.15, 0.25, 0.825, 0.7)
@@ -111,7 +111,7 @@ fig.savefig(f'out/hierarchy_histogram.png')
 fig.savefig(f'out/hierarchy_histogram.tiff')
 plt.close()
 
-# Hierarchical heatmap
+# === HIERARCHICAL HEATMAP ===
 legend_args = {'aa_group': ('Amino acid content', 'grey', ''),
                'charge_group': ('Charge properties', 'black', ''),
                'physchem_group': ('Physiochemical properties', 'white', ''),
