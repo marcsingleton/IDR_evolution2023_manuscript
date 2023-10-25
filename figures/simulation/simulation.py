@@ -42,13 +42,13 @@ ax.set_xlabel('true $\mathregular{\log_{10}(\sigma^2_{BM})}$')
 ax.set_ylabel('estimated $\mathregular{\log_{10}(\sigma^2_{BM})}$')
 subfig.suptitle('A', x=0.025, y=0.975, fontweight='bold')
 
-# --- PANEL B: Type I error as function of cutoff ---
+# --- PANEL B: Type I error as function of critical value ---
 delta_loglikelihood_min, delta_loglikelihood_max = df_BM['delta_loglikelihood'].min(), df_BM['delta_loglikelihood'].max()
-cutoffs = np.linspace(delta_loglikelihood_min, delta_loglikelihood_max, 50)
+critvals = np.linspace(delta_loglikelihood_min, delta_loglikelihood_max, 50)
 
 errors = []
-for cutoff in cutoffs:
-    errors.append(groups_BM['delta_loglikelihood'].aggregate(lambda x: (x > cutoff).mean()))
+for critval in critvals:
+    errors.append(groups_BM['delta_loglikelihood'].aggregate(lambda x: (x > critval).mean()))
 errors = pd.DataFrame(errors).reset_index(drop=True)
 
 subfig = fig.add_subfigure(gs[0, 1], facecolor='none')
@@ -58,25 +58,25 @@ cmap = ListedColormap(plt.colormaps['viridis'].colors[:240])
 norm = Normalize(sigma2_min, sigma2_max)
 get_color = lambda x: cmap(norm(x))
 for sigma2_id in errors:
-    ax.plot(cutoffs, errors[sigma2_id], color=get_color(id2value[sigma2_id]), alpha=0.75)
-ax.set_xlabel('$\mathregular{\log L_{OU} - \log L_{BM}}$ cutoff')
+    ax.plot(critvals, errors[sigma2_id], color=get_color(id2value[sigma2_id]), alpha=0.75)
+ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$ critical value')
 ax.set_ylabel('Type I error')
 subfig.colorbar(ScalarMappable(norm=norm, cmap=cmap))
 subfig.suptitle('B', x=0.025, y=0.975, fontweight='bold')
 
-# --- PANEL C: Type I error as function of cutoff (merge) ---
+# --- PANEL C: Type I error as function of critical value (merge) ---
 errors = []
-for cutoff in cutoffs:
-    errors.append((df_BM['delta_loglikelihood'] > cutoff).mean())
+for critval in critvals:
+    errors.append((df_BM['delta_loglikelihood'] > critval).mean())
 q95 = df_BM['delta_loglikelihood'].quantile(0.95)
 q99 = df_BM['delta_loglikelihood'].quantile(0.99)
 
 subfig = fig.add_subfigure(gs[0, 2], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
-ax.plot(cutoffs, errors)
+ax.plot(critvals, errors)
 ax.axvline(q95, color='C1', label='5%')
 ax.axvline(q99, color='C2', label='1%')
-ax.set_xlabel('$\mathregular{\log L_{OU} - \log L_{BM}}$ cutoff')
+ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$ critical value')
 ax.set_ylabel('Type I error')
 ax.legend(title='Type I error',
           loc='center', bbox_to_anchor=(0.9, 0.5),
