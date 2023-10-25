@@ -33,7 +33,7 @@ gridspec_kw = {'left': 0.2, 'right': 0.9, 'bottom': 0.2, 'top': 0.9}
 dataset = [group['sigma2_hat_BM'].apply(np.log10).to_list() for _, group in groups_BM]
 positions = groups_BM['sigma2'].mean().apply(np.log10).to_list()
 
-subfig = fig.add_subfigure(gs[0, 0])
+subfig = fig.add_subfigure(gs[0, 0], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
 violins = ax.violinplot(dataset, positions, widths=0.75*sigma2_delta, showmedians=True)
 for key in ['cmins', 'cmaxes', 'cmedians', 'cbars']:
@@ -51,7 +51,7 @@ for cutoff in cutoffs:
     errors.append(groups_BM['delta_loglikelihood'].aggregate(lambda x: (x > cutoff).mean()))
 errors = pd.DataFrame(errors).reset_index(drop=True)
 
-subfig = fig.add_subfigure(gs[0, 1])
+subfig = fig.add_subfigure(gs[0, 1], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
 id2value = groups_BM['sigma2'].mean().apply(np.log10).to_dict()
 cmap = ListedColormap(plt.colormaps['viridis'].colors[:240])
@@ -71,7 +71,7 @@ for cutoff in cutoffs:
 q95 = df_BM['delta_loglikelihood'].quantile(0.95)
 q99 = df_BM['delta_loglikelihood'].quantile(0.99)
 
-subfig = fig.add_subfigure(gs[0, 2])
+subfig = fig.add_subfigure(gs[0, 2], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
 ax.plot(cutoffs, errors)
 ax.axvline(q95, color='C1', label='5%')
@@ -95,7 +95,7 @@ extent = (alpha_min-alpha_delta/2, alpha_max+alpha_delta/2,
 array = np.log10((df_parameter['sigma2_hat_OU'] / df_parameter['sigma2']).to_numpy()).reshape((sigma2_num, alpha_num))
 vext = max(abs(array.min()), abs(array.max()))
 
-subfig = fig.add_subfigure(gs[1, 0])
+subfig = fig.add_subfigure(gs[1, 0], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
 im = ax.imshow(array,
                extent=extent, origin='lower', aspect='auto',
@@ -109,7 +109,7 @@ subfig.suptitle('D', x=0.025, y=0.975, fontweight='bold')
 array = np.log10((df_parameter['alpha_hat_OU'] / df_parameter['alpha']).to_numpy()).reshape((sigma2_num, alpha_num))
 vext = max(abs(array.min()), abs(array.max()))
 
-subfig = fig.add_subfigure(gs[1, 1])
+subfig = fig.add_subfigure(gs[1, 1], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
 im = ax.imshow(array,
                extent=extent, origin='lower', aspect='auto',
@@ -120,7 +120,7 @@ fig.colorbar(im)
 subfig.suptitle('E', x=0.025, y=0.975, fontweight='bold')
 
 # --- PANEL F: Heatmap of type II errors ---
-subfig = fig.add_subfigure(gs[1, 2])
+subfig = fig.add_subfigure(gs[1, 2], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
 array = df_error['q99'].to_numpy().reshape((sigma2_num, alpha_num))
 im = ax.imshow(array, extent=extent, origin='lower', aspect='auto')
