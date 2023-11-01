@@ -73,9 +73,9 @@ q99 = df_BM['delta_loglikelihood'].quantile(0.99)
 
 subfig = fig.add_subfigure(gs[1, 1], facecolor='none')
 ax = subfig.subplots(gridspec_kw=gridspec_kw)
-ax.plot(critvals, errors)
+ax.plot(critvals, errors, color='C9')
 ax.axvline(q95, color='C1', label='5%')
-ax.axvline(q99, color='C2', label='1%')
+ax.axvline(q99, color='C0', label='1%')
 ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$ critical value')
 ax.set_ylabel('Type I error')
 ax.legend(title='Type I error',
