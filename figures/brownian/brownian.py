@@ -51,6 +51,7 @@ def set_bin_edge(ax, hb, bin_idx, facecolor, edgecolor, linewidth):
 
 
 pdidx = pd.IndexSlice
+ppid_regex = r'ppid=([A-Za-z0-9_.]+)'
 spid_regex = r'spid=([a-z]+)'
 min_length = 30
 
@@ -307,14 +308,22 @@ subfig.suptitle('D', x=0.025, y=0.975, fontweight='bold')
 
 # --- PANELS E - G ---
 for (OGid, start, stop), params in records.items():
+    # Get segments in region
+    conditions = ((all_segments['OGid'] == OGid) &
+                  (all_segments['start'] == start) &
+                  (all_segments['stop'] == stop))
+    ppids = set(all_segments.loc[conditions, 'ppid'])
+
     # Load MSA
     msa = []
     for header, seq in read_fasta(f'../../IDR_evolution/data/alignments/fastas/{OGid}.afa'):
+        ppid = re.search(ppid_regex, header).group(1)
         spid = re.search(spid_regex, header).group(1)
-        msa.append({'spid': spid, 'seq': seq})
+        if ppid in ppids:
+            msa.append({'ppid': ppid, 'spid': spid, 'seq': seq[start:stop]})
     msa = sorted(msa, key=lambda x: tip_order[x['spid']])
 
-    # Load tree and convert to vectors at tips
+    # Load tree
     tree = tree_template.shear([record['spid'] for record in msa])
     for node in tree.postorder():  # Ensure tree is ordered as in original
         if node.is_tip():
@@ -324,7 +333,7 @@ for (OGid, start, stop), params in records.items():
             node.value = sum([child.value for child in node.children])
 
     subfig = fig.add_subfigure(params['gs'])
-    plot_msa([record['seq'][start:stop] for record in msa],
+    plot_msa([record['seq'] for record in msa],
              x_start=start,
              fig=subfig, figsize=(fig_width * params['fig_width_ratio'], fig_height / gs.nrows),
              tree=tree,
