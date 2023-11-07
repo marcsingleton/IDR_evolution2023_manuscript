@@ -178,92 +178,98 @@ plot_msa_kwargs = {'left': 0.14, 'right': 0.85, 'top': 0.925, 'bottom': 0.15, 'a
                                      'handletextpad': 0.5, 'markerscale': 0.75, 'handlelength': 1},
                    **plot_msa_kwargs_common}
 
-# Q-RICH IDRs
-records = {('03BB', 361, 519, True): {'color': 'C2', 'index': 0},
-           ('0715', 66, 251, True): {'color': 'C3', 'index': 1}}
+plots = [('glutamine', ['fraction_Q', 'repeat_Q'],
+          {('03BB', 361, 519, True): {'color': 'C2', 'index': 0},
+           ('0715', 66, 251, True): {'color': 'C3', 'index': 1}}),
+         ('SCD', ['SCD', 'NCPR'],
+          {('3013', 78, 284, True): {'color': 'C2', 'index': 0},
+           ('233A', 747, 940, True): {'color': 'C3', 'index': 1}}),
+         ('kappa', ['kappa', 'NCPR'],
+          {('26A0', 187, 327, True): {'color': 'C2', 'index': 0},
+           ('0102', 1452, 1603, True): {'color': 'C3', 'index': 1}})]
+for file_label, hexbin_features, records in plots:
+    fig_width, fig_height = 7.5, 8.5
+    fig = plt.figure(figsize=(fig_width, fig_height))
+    gs = plt.GridSpec(2*len(records)+1, 2, height_ratios=[1.5]+len(records)*[1, 1.5])
 
-fig_width, fig_height = 7.5, 8.5
-fig = plt.figure(figsize=(fig_width, fig_height))
-gs = plt.GridSpec(2*len(records)+1, 2, height_ratios=[1.5]+len(records)*[1, 1.5])
+    # --- ROW 1: Scatter of mean and delta loglikelihood ---
+    for idx, hexbin_feature in enumerate(hexbin_features):
+        xs = models.loc[pdidx[:, :, :, True], f'{hexbin_feature}_delta_loglikelihood']
+        ys = models.loc[pdidx[:, :, :, True], f'{hexbin_feature}_mu_OU']
 
-# --- ROW 1: Scatter of mean and delta loglikelihood ---
-for idx, feature_label in enumerate(['fraction_Q', 'repeat_Q']):
-    xs = models.loc[pdidx[:, :, :, True], f'{feature_label}_delta_loglikelihood']
-    ys = models.loc[pdidx[:, :, :, True], f'{feature_label}_mu_OU']
+        subfig = fig.add_subfigure(gs[0, idx])
+        ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.8, 'bottom': 0.25, 'top': 0.95})
+        hb = ax.hexbin(xs, ys, cmap='Greys', gridsize=25, linewidth=0, mincnt=1, bins='log')
+        ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$' + f' ({hexbin_feature})')
+        ax.set_ylabel('$\mathregular{\mu_{OU}}$' + f' ({hexbin_feature})')
+        subfig.colorbar(hb, ax=ax)
+        subfig.suptitle(ascii_uppercase[idx], x=0.025, y=0.975, fontweight='bold')
 
-    subfig = fig.add_subfigure(gs[0, idx])
-    ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.8, 'bottom': 0.25, 'top': 0.95})
-    hb = ax.hexbin(xs, ys, cmap='Greys', gridsize=25, linewidth=0, mincnt=1, bins='log')
-    ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$')
-    ax.set_ylabel('$\mathregular{\mu_{OU}}$')
-    subfig.colorbar(hb, ax=ax)
-    subfig.suptitle(ascii_uppercase[idx], x=0.025, y=0.975, fontweight='bold')
+        for ids, params in records.items():
+            x, y = xs[ids], ys[ids]
+            bin_idx = get_bin(ax, hb, x, y)
+            set_bin_edge(ax, hb, bin_idx, 'none', params['color'], 1.5)
 
-    for ids, params in records.items():
-        x, y = xs[ids], ys[ids]
-        bin_idx = get_bin(ax, hb, x, y)
-        set_bin_edge(ax, hb, bin_idx, 'none', params['color'], 1.5)
+    for (OGid, start, stop, _), params in records.items():
+        # --- ROW 2: Sample region ---
+        # Get segments in region
+        conditions = ((all_segments['OGid'] == OGid) &
+                      (all_segments['start'] == start) &
+                      (all_segments['stop'] == stop))
+        ppids = set(all_segments.loc[conditions, 'ppid'])
 
-for (OGid, start, stop, _), params in records.items():
-    # --- ROW 2: Sample region ---
-    # Get segments in region
-    conditions = ((all_segments['OGid'] == OGid) &
-                  (all_segments['start'] == start) &
-                  (all_segments['stop'] == stop))
-    ppids = set(all_segments.loc[conditions, 'ppid'])
+        # Load MSA
+        msa = []
+        for header, seq in read_fasta(f'../../IDR_evolution/data/alignments/fastas/{OGid}.afa'):
+            ppid = re.search(ppid_regex, header).group(1)
+            spid = re.search(spid_regex, header).group(1)
+            if ppid in ppids:
+                msa.append({'ppid': ppid, 'spid': spid, 'seq': seq[start:stop]})
+        msa = sorted(msa, key=lambda x: tip_order[x['spid']])
 
-    # Load MSA
-    msa = []
-    for header, seq in read_fasta(f'../../IDR_evolution/data/alignments/fastas/{OGid}.afa'):
-        ppid = re.search(ppid_regex, header).group(1)
-        spid = re.search(spid_regex, header).group(1)
-        if ppid in ppids:
-            msa.append({'ppid': ppid, 'spid': spid, 'seq': seq[start:stop]})
-    msa = sorted(msa, key=lambda x: tip_order[x['spid']])
+        # Load tree
+        tree = tree_template.shear([record['spid'] for record in msa])
+        for node in tree.postorder():  # Ensure tree is ordered as in original
+            if node.is_tip():
+                node.value = tip_order[node.name]
+            else:
+                node.children = sorted(node.children, key=lambda x: x.value)
+                node.value = sum([child.value for child in node.children])
 
-    # Load tree
-    tree = tree_template.shear([record['spid'] for record in msa])
-    for node in tree.postorder():  # Ensure tree is ordered as in original
-        if node.is_tip():
-            node.value = tip_order[node.name]
-        else:
-            node.children = sorted(node.children, key=lambda x: x.value)
-            node.value = sum([child.value for child in node.children])
+        subfig = fig.add_subfigure(gs[2*params['index']+1, :])
+        plot_msa([record['seq'] for record in msa],
+                 x_start=start,
+                 fig=subfig, figsize=(fig_width, fig_height / gs.nrows),
+                 tree=tree,
+                 **plot_msa_kwargs)
+        subfig.suptitle(ascii_uppercase[2*params['index']+2], x=0.0125, y=0.975, fontweight='bold')
 
-    subfig = fig.add_subfigure(gs[2*params['index']+1, :])
-    plot_msa([record['seq'] for record in msa],
-             x_start=start,
-             fig=subfig, figsize=(fig_width, fig_height / gs.nrows),
-             tree=tree,
-             **plot_msa_kwargs)
-    subfig.suptitle(ascii_uppercase[2*params['index']+2], x=0.0125, y=0.975, fontweight='bold')
+        for ax in subfig.axes:
+            bar_offset = 0.0075
+            bar_width = 0.005
+            bar_ax = ax.inset_axes((plot_msa_kwargs['tree_position'] - bar_offset, 0, bar_width, 1),
+                                   transform=blended_transform_factory(subfig.transSubfigure, ax.transAxes))
+            bar_ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=params['color']))
+            bar_ax.set_axis_off()
 
-    for ax in subfig.axes:
-        bar_offset = 0.0075
-        bar_width = 0.005
-        bar_ax = ax.inset_axes((plot_msa_kwargs['tree_position'] - bar_offset, 0, bar_width, 1),
-                               transform=blended_transform_factory(subfig.transSubfigure, ax.transAxes))
-        bar_ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=params['color']))
-        bar_ax.set_axis_off()
+        # --- ROW 3: delta loglikelihood ---
+        column_labels = [f'{feature_label}_delta_loglikelihood' for feature_label in feature_labels]
+        ys = models.loc[pdidx[OGid, start, stop, True], column_labels]
+        xs = list(range(len(column_labels)))
+        labels = [label.removesuffix('_delta_loglikelihood') for label in column_labels]
 
-    # --- ROW 3: delta loglikelihood ---
-    column_labels = [f'{feature_label}_delta_loglikelihood' for feature_label in feature_labels]
-    ys = models.loc[pdidx[OGid, start, stop, True], column_labels]
-    xs = list(range(len(column_labels)))
-    labels = [label.removesuffix('_delta_loglikelihood') for label in column_labels]
+        subfig = fig.add_subfigure(gs[2*params['index']+2, :])
+        ax = subfig.subplots(gridspec_kw={'left': 0.075, 'right': 0.99, 'bottom': 0.45, 'top': 0.925})
+        ax.bar(xs, ys, facecolor='none', edgecolor='black', linewidth=0.75)
+        ax.axhline(critvals['q99'], label='1%', color='C0', linewidth=0.75, linestyle='--')
+        ax.axhline(critvals['q95'], label='5%', color='C1', linewidth=0.75, linestyle='--')
+        ax.set_xmargin(0.005)
+        ax.set_xticks(xs, labels, fontsize=5.5,
+                      rotation=60, rotation_mode='anchor', ha='right', va='center')
+        ax.set_ylabel('$\mathregular{\log L_{OU} / L_{BM}}$')
+        ax.legend(title='Type I error', title_fontsize=6, fontsize=6)
+        subfig.suptitle(ascii_uppercase[2*params['index']+3], x=0.0125, y=0.975, fontweight='bold')
 
-    subfig = fig.add_subfigure(gs[2*params['index']+2, :])
-    ax = subfig.subplots(gridspec_kw={'left': 0.075, 'right': 0.99, 'bottom': 0.45, 'top': 0.925})
-    ax.bar(xs, ys, facecolor='none', edgecolor='black', linewidth=0.75)
-    ax.axhline(critvals['q99'], label='1%', color='C0', linewidth=0.75, linestyle='--')
-    ax.axhline(critvals['q95'], label='5%', color='C1', linewidth=0.75, linestyle='--')
-    ax.set_xmargin(0.005)
-    ax.set_xticks(xs, labels, fontsize=5.5,
-                  rotation=60, rotation_mode='anchor', ha='right', va='center')
-    ax.set_ylabel('$\mathregular{\log L_{OU} / L_{BM}}$')
-    ax.legend(title='Type I error', title_fontsize=6, fontsize=6)
-    subfig.suptitle(ascii_uppercase[2*params['index']+3], x=0.0125, y=0.975, fontweight='bold')
-
-fig.savefig('out/alignment.png', dpi=300)
-fig.savefig('out/alignment.tiff', dpi=300)
-plt.close()
+    fig.savefig(f'out/alignment_{file_label}.png', dpi=300)
+    fig.savefig(f'out/alignment_{file_label}.tiff', dpi=300)
+    plt.close()
