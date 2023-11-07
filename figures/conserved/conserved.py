@@ -101,7 +101,7 @@ ax.set_xmargin(0.005)
 ax.set_xticks(xs, labels, fontsize=5.5,
               rotation=60, rotation_mode='anchor', ha='right', va='center')
 ax.set_ylabel('Fraction of regions')
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.425), ncol=2,
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.45), ncol=2,
           title='Type I error rate', fontsize=8, title_fontsize=8)
 subfig.suptitle('A', x=0.025, y=0.975, fontweight='bold')
 
