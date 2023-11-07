@@ -10,8 +10,41 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import skbio
+from matplotlib.transforms import blended_transform_factory
 from src.draw import plot_msa
 from src.utils import read_fasta
+
+
+def get_bin2data(ax, hb, xs, ys):
+    transform = ax.transData  # Use display coordinates to prevent scaling from impacting distance calculation
+    offsets = transform.transform(hb.get_offsets())
+    xys = transform.transform(np.stack([xs, ys]).transpose())
+    dist2 = ((offsets[:, np.newaxis, :] - xys) ** 2).sum(axis=-1)  # A clever array method of calculating all pairwise deltas
+    bin_idxs = np.argmin(dist2, axis=0)
+
+    bin2data = {}
+    for data_idx, bin_idx in enumerate(bin_idxs):
+        try:
+            bin2data[bin_idx].append(data_idx)
+        except KeyError:
+            bin2data[bin_idx] = [data_idx]
+
+    return bin2data
+
+
+def get_bin(ax, hb, x, y):
+    bin2data = get_bin2data(ax, hb, [x], [y])
+    return list(bin2data)[0]
+
+
+def set_bin_edge(ax, hb, bin_idx, facecolor, edgecolor, linewidth):
+    path = hb.get_paths()[0]
+    offset = hb.get_offsets()[bin_idx]
+
+    vertices = path.vertices + offset
+    hexagon = plt.Polygon(vertices, facecolor=facecolor, edgecolor=edgecolor, linewidth=linewidth)
+    ax.add_patch(hexagon)
+
 
 pdidx = pd.IndexSlice
 ppid_regex = r'ppid=([A-Za-z0-9_.]+)'
@@ -138,22 +171,41 @@ plt.close()
 # === ALIGNMENT FIGURE ===
 plot_msa_kwargs_common = {'tree_kwargs': {'linewidth': 0.75, 'tip_labels': False, 'xmin_pad': 0.025, 'xmax_pad': 0.025},
                           'msa_legend': True}
-plot_msa_kwargs = {'left': 0.12, 'right': 0.85, 'top': 0.925, 'bottom': 0.075, 'anchor': (0, 0.5),
+plot_msa_kwargs = {'left': 0.14, 'right': 0.85, 'top': 0.925, 'bottom': 0.15, 'anchor': (0, 0.5),
                    'hspace': 0.01,
-                   'tree_position': 0.02, 'tree_width': 0.1,
+                   'tree_position': 0.04, 'tree_width': 0.1,
                    'legend_kwargs': {'bbox_to_anchor': (0.875, 0.5), 'loc': 'center left', 'fontsize': 5,
                                      'handletextpad': 0.5, 'markerscale': 0.75, 'handlelength': 1},
                    **plot_msa_kwargs_common}
 
-records = [('1944', 474, 623, True),
-           ('0E60', 370, 508, True)]
+# Q-RICH IDRs
+records = {('03BB', 361, 519, True): {'color': 'C2', 'index': 0},
+           ('0715', 66, 251, True): {'color': 'C3', 'index': 1}}
 
-fig_width, fig_height = 7.5, 7.5
+fig_width, fig_height = 7.5, 8.5
 fig = plt.figure(figsize=(fig_width, fig_height))
-gs = plt.GridSpec(2*len(records), 1)
+gs = plt.GridSpec(2*len(records)+1, 2, height_ratios=[1.5]+len(records)*[1, 1.5])
 
-for idx, (OGid, start, stop, _) in enumerate(records):
-    # --- PANEL 1: Sample region ---
+# --- ROW 1: Scatter of mean and delta loglikelihood ---
+for idx, feature_label in enumerate(['fraction_Q', 'repeat_Q']):
+    xs = models.loc[pdidx[:, :, :, True], f'{feature_label}_delta_loglikelihood']
+    ys = models.loc[pdidx[:, :, :, True], f'{feature_label}_mu_OU']
+
+    subfig = fig.add_subfigure(gs[0, idx])
+    ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.8, 'bottom': 0.25, 'top': 0.95})
+    hb = ax.hexbin(xs, ys, cmap='Greys', gridsize=25, linewidth=0, mincnt=1, bins='log')
+    ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$')
+    ax.set_ylabel('$\mathregular{\mu_{OU}}$')
+    subfig.colorbar(hb, ax=ax)
+    subfig.suptitle(ascii_uppercase[idx], x=0.025, y=0.975, fontweight='bold')
+
+    for ids, params in records.items():
+        x, y = xs[ids], ys[ids]
+        bin_idx = get_bin(ax, hb, x, y)
+        set_bin_edge(ax, hb, bin_idx, 'none', params['color'], 1.5)
+
+for (OGid, start, stop, _), params in records.items():
+    # --- ROW 2: Sample region ---
     # Get segments in region
     conditions = ((all_segments['OGid'] == OGid) &
                   (all_segments['start'] == start) &
@@ -178,22 +230,30 @@ for idx, (OGid, start, stop, _) in enumerate(records):
             node.children = sorted(node.children, key=lambda x: x.value)
             node.value = sum([child.value for child in node.children])
 
-    subfig = fig.add_subfigure(gs[2*idx])
+    subfig = fig.add_subfigure(gs[2*params['index']+1, :])
     plot_msa([record['seq'] for record in msa],
              x_start=start,
              fig=subfig, figsize=(fig_width, fig_height / gs.nrows),
              tree=tree,
              **plot_msa_kwargs)
-    subfig.suptitle(ascii_uppercase[2*idx], x=0.0125, y=0.975, fontweight='bold')
+    subfig.suptitle(ascii_uppercase[2*params['index']+2], x=0.0125, y=0.975, fontweight='bold')
 
-    # --- Panel 2: delta loglikelihood ---
+    for ax in subfig.axes:
+        bar_offset = 0.0075
+        bar_width = 0.005
+        bar_ax = ax.inset_axes((plot_msa_kwargs['tree_position'] - bar_offset, 0, bar_width, 1),
+                               transform=blended_transform_factory(subfig.transSubfigure, ax.transAxes))
+        bar_ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=params['color']))
+        bar_ax.set_axis_off()
+
+    # --- ROW 3: delta loglikelihood ---
     column_labels = [f'{feature_label}_delta_loglikelihood' for feature_label in feature_labels]
     ys = models.loc[pdidx[OGid, start, stop, True], column_labels]
     xs = list(range(len(column_labels)))
     labels = [label.removesuffix('_delta_loglikelihood') for label in column_labels]
 
-    subfig = fig.add_subfigure(gs[2*idx+1])
-    ax = subfig.subplots(gridspec_kw={'left': 0.075, 'right': 0.99, 'bottom': 0.45, 'top': 0.95})
+    subfig = fig.add_subfigure(gs[2*params['index']+2, :])
+    ax = subfig.subplots(gridspec_kw={'left': 0.075, 'right': 0.99, 'bottom': 0.45, 'top': 0.925})
     ax.bar(xs, ys, facecolor='none', edgecolor='black', linewidth=0.75)
     ax.axhline(critvals['q99'], label='1%', color='C0', linewidth=0.75, linestyle='--')
     ax.axhline(critvals['q95'], label='5%', color='C1', linewidth=0.75, linestyle='--')
@@ -201,8 +261,8 @@ for idx, (OGid, start, stop, _) in enumerate(records):
     ax.set_xticks(xs, labels, fontsize=5.5,
                   rotation=60, rotation_mode='anchor', ha='right', va='center')
     ax.set_ylabel('$\mathregular{\log L_{OU} / L_{BM}}$')
-    ax.legend(title='Type I error', title_fontsize=8, fontsize=8)
-    subfig.suptitle(ascii_uppercase[2*idx+1], x=0.0125, y=0.975, fontweight='bold')
+    ax.legend(title='Type I error', title_fontsize=6, fontsize=6)
+    subfig.suptitle(ascii_uppercase[2*params['index']+3], x=0.0125, y=0.975, fontweight='bold')
 
 fig.savefig('out/alignment.png', dpi=300)
 fig.savefig('out/alignment.tiff', dpi=300)
