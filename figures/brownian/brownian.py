@@ -21,9 +21,10 @@ def zscore(df):
 
 
 def get_bin2data(hb, xs, ys):
-    offsets = hb.get_offsets()
-    xys = np.stack([xs, ys]).transpose()
-    dist2 = ((offsets[:, np.newaxis, :] - xys) ** 2).sum(axis=-1)
+    transform = ax.transData  # Use display coordinates to prevent scaling from impacting distance calculation
+    offsets = transform.transform(hb.get_offsets())
+    xys = transform.transform(np.stack([xs, ys]).transpose())
+    dist2 = ((offsets[:, np.newaxis, :] - xys) ** 2).sum(axis=-1)  # A clever array method of calculating all pairwise deltas
     bin_idxs = np.argmin(dist2, axis=0)
 
     bin2data = {}
