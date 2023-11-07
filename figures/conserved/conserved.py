@@ -52,7 +52,7 @@ spid_regex = r'spid=([a-z]+)'
 min_length = 30
 
 min_indel_columns = 5  # Indel rates below this value are set to 0
-min_aa_rate = 2
+min_aa_rate = 1
 min_indel_rate = 0.1
 
 tree_template = skbio.read('../../IDR_evolution/data/trees/consensus_LG/100R_NI.nwk', 'newick', skbio.TreeNode)
