@@ -14,8 +14,6 @@ ppid_regex = r'ppid=([A-Za-z0-9_.]+)'
 min_length = 30
 
 min_indel_columns = 5  # Indel rates below this value are set to 0
-min_aa_rate = 1
-min_indel_rate = 0.1
 
 # Load regions as segments
 rows = []
