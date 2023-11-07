@@ -285,7 +285,7 @@ contrasts = contrasts.set_index(['OGid', 'start', 'stop', 'disorder', 'contrast_
 rates = (contrasts ** 2).groupby(['OGid', 'start', 'stop', 'disorder']).mean()
 quantile = rates['score_fraction'].quantile(0.9, interpolation='higher')  # Capture at least 90% of data with higher
 
-fig, axs = plt.subplots(2, 1, gridspec_kw={'left': 0.1, 'right': 0.9, 'top': 0.975, 'bottom': 0.1})
+fig, axs = plt.subplots(2, 1, gridspec_kw={'left': 0.1, 'right': 0.9, 'bottom': 0.1, 'top': 0.975})
 for ax in axs:
     ax.axvspan(quantile, rates['score_fraction'].max(), color='#e6e6e6')
     ax.hist(rates['score_fraction'], bins=150, color=color3)
