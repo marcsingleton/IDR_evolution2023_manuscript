@@ -50,6 +50,7 @@ means = regions.mean()
 disorder = means.loc[pdidx[:, :, :, True], :]
 order = means.loc[pdidx[:, :, :, False], :]
 
+# Filter by rates
 asr_rates = pd.read_table(f'../../IDR_evolution/analysis/evofit/asr_stats/out/regions_{min_length}/rates.tsv')
 asr_rates = all_regions.merge(asr_rates, how='right', on=['OGid', 'start', 'stop'])
 row_idx = (asr_rates['indel_num_columns'] < min_indel_columns) | asr_rates['indel_rate_mean'].isna()

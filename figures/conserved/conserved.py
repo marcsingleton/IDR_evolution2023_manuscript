@@ -73,6 +73,7 @@ with open(f'../../IDR_evolution/analysis/IDRpred/region_filter/out/regions_{min_
 all_segments = pd.DataFrame(rows)
 all_regions = all_segments.drop('ppid', axis=1).drop_duplicates()
 
+# Filter by rates
 asr_rates = pd.read_table(f'../../IDR_evolution/analysis/evofit/asr_stats/out/regions_{min_length}/rates.tsv')
 asr_rates = all_regions.merge(asr_rates, how='right', on=['OGid', 'start', 'stop'])
 row_idx = (asr_rates['indel_num_columns'] < min_indel_columns) | asr_rates['indel_rate_mean'].isna()
@@ -86,6 +87,7 @@ models = pd.read_table(f'../../IDR_evolution/analysis//brownian/model_compute/ou
 models = region_keys.merge(models.droplevel(1, axis=1), how='left', on=['OGid', 'start', 'stop'])
 models = models.set_index(['OGid', 'start', 'stop', 'disorder'])
 
+# Extract labels
 feature_groups = {}
 feature_labels = []
 nonmotif_labels = []
@@ -104,6 +106,7 @@ for column_label, group_label in zip(column_labels, group_labels):
     if group_label != 'motifs_group':
         nonmotif_labels.append(feature_label)
 
+# Calculate delta loglikelihood
 columns = {}
 for feature_label in feature_labels:
     columns[f'{feature_label}_delta_loglikelihood'] = models[f'{feature_label}_loglikelihood_OU'] - models[f'{feature_label}_loglikelihood_BM']
