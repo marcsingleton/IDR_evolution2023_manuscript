@@ -77,7 +77,6 @@ for column_label, group_label in zip(column_labels, group_labels):
 columns = {}
 for feature_label in feature_labels:
     columns[f'{feature_label}_delta_loglikelihood'] = models[f'{feature_label}_loglikelihood_OU'] - models[f'{feature_label}_loglikelihood_BM']
-    columns[f'{feature_label}_sigma2_ratio'] = models[f'{feature_label}_sigma2_BM'] / models[f'{feature_label}_sigma2_OU']
 models = pd.concat([models, pd.DataFrame(columns)], axis=1)
 
 if not os.path.exists('out/'):
