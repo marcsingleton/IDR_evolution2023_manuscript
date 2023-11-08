@@ -170,7 +170,7 @@ plt.close()
 
 # === SUPPLEMENT ORDER ===
 order = rates.loc[pdidx[:, :, :, False], :]
-order_nonmotif = rates[nonmotif_labels]
+order_nonmotif = order[nonmotif_labels]
 
 data = zscore(order_nonmotif)
 pca = PCA(n_components=pca_components)
