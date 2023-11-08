@@ -371,11 +371,14 @@ gs = plt.GridSpec(1, len(width_ratios), width_ratios=width_ratios)
 data = disorder_nonmotif
 
 var = data.var().sort_values(ascending=False)
+var = var / var.sum()
 truncate = pd.concat([var[:9], pd.Series({'other': var[9:].sum()})])
 subfig = fig.add_subfigure(gs[0, 0])
-ax = subfig.subplots(gridspec_kw={'bottom': 0.3})
-ax.pie(truncate.values, labels=truncate.index, labeldistance=None)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0), fontsize=7, ncol=2)
+ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.95, 'bottom': 0.3})
+ax.bar(range(len(truncate.index)), truncate.values)
+ax.set_xticks(range(len(truncate.index)), truncate.index, fontsize=7,
+              rotation=60, rotation_mode='anchor', ha='right', va='center')
+ax.set_ylabel('Explained variance ratio')
 subfig.suptitle('A', x=0.0125/width_ratios[0], y=0.975, fontweight='bold')
 
 # --- PANELS B-C ---
@@ -384,11 +387,14 @@ pca = PCA(n_components=pca_components)
 pca.fit(data.to_numpy())
 
 var = data.var().sort_values(ascending=False)
+var = var / var.sum()
 truncate = pd.concat([var[:9], pd.Series({'other': var[9:].sum()})])
 subfig = fig.add_subfigure(gs[0, 1])
-ax = subfig.subplots(gridspec_kw={'bottom': 0.3})
-ax.pie(truncate.values, labels=truncate.index, labeldistance=None)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0), fontsize=7, ncol=2)
+ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.95, 'bottom': 0.3})
+ax.bar(range(len(truncate.index)), truncate.values)
+ax.set_xticks(range(len(truncate.index)), truncate.index, fontsize=7,
+              rotation=60, rotation_mode='anchor', ha='right', va='center')
+ax.set_ylabel('Explained variance ratio')
 subfig.suptitle('B', x=0.0125/width_ratios[1], y=0.975, fontweight='bold')
 
 # Scree plot
@@ -414,11 +420,14 @@ gs = plt.GridSpec(1, len(width_ratios), width_ratios=width_ratios)
 data = disorder_nonmotif
 
 var = data.var().sort_values(ascending=False)
+var = var / var.sum()
 truncate = pd.concat([var[:9], pd.Series({'other': var[9:].sum()})])
 subfig = fig.add_subfigure(gs[0, 0])
-ax = subfig.subplots(gridspec_kw={'bottom': 0.3})
-ax.pie(truncate.values, labels=truncate.index, labeldistance=None)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0), fontsize=7, ncol=2)
+ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.95, 'bottom': 0.3})
+ax.bar(range(len(truncate.index)), truncate.values)
+ax.set_xticks(range(len(truncate.index)), truncate.index, fontsize=7,
+              rotation=60, rotation_mode='anchor', ha='right', va='center')
+ax.set_ylabel('Explained variance ratio')
 subfig.suptitle('A', x=0.0125/width_ratios[0], y=0.975, fontweight='bold')
 
 # --- PANELS B-C ---
@@ -427,11 +436,14 @@ pca = PCA(n_components=pca_components)
 pca.fit(data.to_numpy())
 
 var = data.var().sort_values(ascending=False)
+var = var / var.sum()
 truncate = pd.concat([var[:9], pd.Series({'other': var[9:].sum()})])
 subfig = fig.add_subfigure(gs[0, 1])
-ax = subfig.subplots(gridspec_kw={'bottom': 0.3})
-ax.pie(truncate.values, labels=truncate.index, labeldistance=None)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0), fontsize=7, ncol=2)
+ax = subfig.subplots(gridspec_kw={'left': 0.25, 'right': 0.95, 'bottom': 0.3})
+ax.bar(range(len(truncate.index)), truncate.values)
+ax.set_xticks(range(len(truncate.index)), truncate.index, fontsize=7,
+              rotation=60, rotation_mode='anchor', ha='right', va='center')
+ax.set_ylabel('Explained variance ratio')
 subfig.suptitle('B', x=0.0125/width_ratios[1], y=0.975, fontweight='bold')
 
 # Scree plot
