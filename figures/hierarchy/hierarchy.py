@@ -223,6 +223,6 @@ cax = fig.add_axes((xcenter - width / 2, ycenter - height / 2, width, height))
 cax.set_title('$\mathregular{\log L_{OU} / L_{BM}}$', fontdict={'fontsize': 10})
 fig.colorbar(im, cax=cax, orientation='horizontal')
 
-fig.savefig(f'out/hierarchy.png', dpi=600)
-fig.savefig(f'out/hierarchy.tiff', dpi=600)
+fig.savefig('out/hierarchy.png', dpi=600)
+fig.savefig('out/hierarchy.tiff', dpi=600)
 plt.close()

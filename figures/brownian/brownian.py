@@ -118,8 +118,8 @@ contrasts = contrasts.set_index(['OGid', 'start', 'stop', 'disorder', 'contrast_
 
 rates = (contrasts ** 2).groupby(['OGid', 'start', 'stop', 'disorder']).mean()
 
-if not os.path.exists(f'out/'):
-    os.mkdir(f'out/')
+if not os.path.exists('out/'):
+    os.mkdir('out/')
 
 # === TWO PANEL PCA PLOTS ===
 # ===========================
