@@ -8,7 +8,6 @@ from string import ascii_uppercase
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
 import skbio
 from matplotlib.transforms import blended_transform_factory
 from src.draw import plot_msa
@@ -139,25 +138,28 @@ ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.45), ncol=2,
 subfig.suptitle('A', x=0.025, y=0.975, fontweight='bold')
 
 # --- PANEL B: Distribution of number of significant features in regions ---
+rng = np.random.default_rng(1)
 column_labels = [f'{feature_label}_delta_loglikelihood' for feature_label in feature_labels]
 
 counts_95 = (models.loc[pdidx[:, :, :, True], column_labels] > critvals['q95']).sum(axis=1).value_counts()
-xs_95 = np.arange(counts_95.index.min(), counts_95.index.max() + 1)
-ys_95 = stats.binom.pmf(xs_95, n=len(column_labels), p=0.05) * counts_95.values.sum()
+shuffle_95 = rng.permuted((models.loc[pdidx[:, :, :, True], column_labels] > critvals['q95']).to_numpy(), axis=0)
+xs_95, ys_95 = np.unique(shuffle_95.sum(axis=1), return_counts=True)
+p_95 = shuffle_95.mean()
 
 counts_99 = (models.loc[pdidx[:, :, :, True], column_labels] > critvals['q99']).sum(axis=1).value_counts()
-xs_99 = np.arange(counts_99.index.min(), counts_99.index.max() + 1)
-ys_99 = stats.binom.pmf(xs_99, n=len(column_labels), p=0.01) * counts_99.values.sum()
+shuffle_99 = rng.permuted((models.loc[pdidx[:, :, :, True], column_labels] > critvals['q99']).to_numpy(), axis=0)
+xs_99, ys_99 = np.unique(shuffle_99.sum(axis=1), return_counts=True)
+p_99 = shuffle_99.mean()
 
 subfig = fig.add_subfigure(gs[1, 0])
 axs = subfig.subplots(1, 2, gridspec_kw={'left': 0.1, 'right': 0.99, 'bottom': 0.225, 'top': 0.95})
 
 width = 0.35
-plots = [(counts_99, xs_99, ys_99, 'observed\n(1% type I error)', 'C0'),
-         (counts_95, xs_95, ys_95, 'observed\n(5% type I error)', 'C1')]
-for ax, (counts, xs, ys, label, color) in zip(axs, plots):
-    ax.bar(counts.index - width / 2, counts.values, width=width, label=label, color=color)
-    ax.bar(xs + width / 2, ys, width=width, label='random', color='C9')
+plots = [(counts_99, xs_99, ys_99, p_99, 'observed\n(1% type I error)', 'C0'),
+         (counts_95, xs_95, ys_95, p_95, 'observed\n(5% type I error)', 'C1')]
+for ax, (counts, xs, ys, p, label, color) in zip(axs, plots):
+    ax.bar(counts.index - width/2, counts.values, width=width, label=label, color=color)
+    ax.bar(xs + width/2, ys, width=width, label='random\n($\hat{p} = $' + f'{p:.02})', color='C9')
     ax.set_xmargin(0.01)
     ax.set_xlabel('Number of significant features')
     ax.set_ylabel('Number of regions')
