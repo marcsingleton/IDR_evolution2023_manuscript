@@ -165,11 +165,16 @@ lm = linkage(cdm, method='average')
 tree = make_tree(lm)
 tip_order = [int(tip.name) for tip in tree.tips()]
 cluster_nodes = set()
+node2root = {}
 for root_id, _, _ in clusters:
     root_node = tree.find(root_id)
-    cluster_nodes.update(root_node.traverse())
+    for node in root_node.traverse():
+        cluster_nodes.add(node)
+        node2root[node] = root_node
 
 # Get branch colors
+cmaps = [plt.colormaps[name] for name in ['Blues_r', 'Oranges_r', 'Reds_r', 'Greens_r', 'Purples_r']]
+id2color = {root_id: cmaps[i % len(cmaps)] for i, (root_id, _, _) in enumerate(clusters)}
 node2color, node2tips = {}, {}
 for node in tree.postorder():
     if node.is_tip():
@@ -178,7 +183,7 @@ for node in tree.postorder():
         tips = sum([node2tips[child] for child in node.children])
     node2tips[node] = tips
     if node in cluster_nodes:
-        cmap = plt.colormaps['Reds_r']
+        cmap = id2color[node2root[node].name]
     else:
         cmap = plt.colormaps['Greys_r']
     node2color[node] = cmap(max(0., (11 - tips) / 10))
@@ -221,7 +226,7 @@ for root_id, cluster_id, cluster_label in clusters:
 
     rect = plt.Rectangle((0.05, upper_idx), 0.2, lower_idx - upper_idx, facecolor='white', edgecolor='black', linewidth=1)
     ax.add_patch(rect)
-    ax.text(0.325, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize='medium', fontweight='bold')
+    ax.text(0.325, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize='xx-small', fontweight='bold')
     ax.text(0.4, (upper_idx + lower_idx) / 2, cluster_label, va='center_baseline', fontsize='x-small')
 ax.sharey(axs[0, 1])
 ax.set_axis_off()
