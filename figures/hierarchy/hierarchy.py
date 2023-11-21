@@ -173,7 +173,7 @@ for root_id, _, _ in clusters:
         node2root[node] = root_node
 
 # Get branch colors
-cmaps = [plt.colormaps[name] for name in ['Blues_r', 'Oranges_r', 'Reds_r', 'Greens_r', 'Purples_r']]
+cmaps = [plt.colormaps[name] for name in ['Blues_r', 'Oranges_r', 'Greens_r', 'Reds_r', 'Purples_r']]
 id2color = {root_id: cmaps[i % len(cmaps)] for i, (root_id, _, _) in enumerate(clusters)}
 node2color, node2tips = {}, {}
 for node in tree.postorder():
@@ -223,11 +223,14 @@ for root_id, cluster_id, cluster_label in clusters:
     tips = list(root_node.tips())
     upper_idx = id2idx[tips[0].name]
     lower_idx = id2idx[tips[-1].name]
+    if len(tips) < 50:
+        continue
 
-    rect = plt.Rectangle((0.05, upper_idx), 0.2, lower_idx - upper_idx, facecolor='white', edgecolor='black', linewidth=1)
+    rect = plt.Rectangle((0.05, upper_idx), 0.2, lower_idx - upper_idx, facecolor='white',
+                         edgecolor='black', linewidth=1, clip_on=False)
     ax.add_patch(rect)
     ax.text(0.325, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize='xx-small', fontweight='bold')
-    ax.text(0.4, (upper_idx + lower_idx) / 2, cluster_label, va='center_baseline', fontsize='x-small')
+    ax.text(0.4, (upper_idx + lower_idx) / 2, cluster_label, va='center_baseline', fontsize='xx-small')
 ax.sharey(axs[0, 1])
 ax.set_axis_off()
 
