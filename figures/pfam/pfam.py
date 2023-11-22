@@ -62,11 +62,11 @@ hs_disorder = [(disorder['fraction'] == 0).sum(), (disorder['fraction'] != 0).su
 hs_order = [(order['fraction'] == 0).sum(), (order['fraction'] != 0).sum()]
 hs_stack = list(zip(hs_disorder, hs_order))
 
-chi2, p, dof, expected = chi2_contingency(hs_stack)
+result = chi2_contingency(hs_stack)
 output = f"""\
-chi2: {chi2}
-p: {p}
-dof: {dof}
+chi2: {result.statistic}
+p: {result.pvalue}
+dof: {result.dof}
 """
 with open('out/chi2.txt', 'w') as file:
     file.write(output)

@@ -85,7 +85,8 @@ x2 = (asr_rates.loc[asr_rates['disorder'] == False, 'aa_rate_mean'] +
 # Code adapted from SciPy stats example in mannwhitneyu function
 nx1, nx2 = len(x1), len(x2)
 N = nx1 + nx2
-U1, p = stats.mannwhitneyu(x1, x2, alternative='greater')
+result = stats.mannwhitneyu(x1, x2, alternative='greater')
+U1 = result.statistic
 U2 = nx1 * nx2 - U1
 U = min(U1, U2)
 z = (U - nx1 * nx2 / 2 + 0.5) / sqrt(nx1 * nx2 * (N + 1) / 12)
