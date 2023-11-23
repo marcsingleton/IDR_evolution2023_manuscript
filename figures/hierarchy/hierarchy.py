@@ -5,10 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import skbio
 from matplotlib.patches import Patch, Rectangle
-from scipy.cluster.hierarchy import linkage
-from scipy.spatial.distance import pdist
-from src.brownian.linkage import make_tree
 from src.draw import plot_tree
 
 pdidx = pd.IndexSlice
@@ -109,6 +107,18 @@ for feature_label in feature_labels:
     columns[f'{feature_label}_delta_loglikelihood'] = models[f'{feature_label}_loglikelihood_OU'] - models[f'{feature_label}_loglikelihood_BM']
 models = pd.concat([models, pd.DataFrame(columns)], axis=1)
 
+# Load cluster tree
+tree = skbio.read('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_all_correlation.nwk',
+                  'newick', skbio.TreeNode)
+id2ids = {}
+with open('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_all_correlation.tsv') as file:
+    field_names = file.readline().rstrip('\n').split('\t')
+    for line in file:
+        fields = {key: value for key, value in zip(field_names, line.rstrip('\n').split('\t'))}
+        OGid, start, stop, disorder = fields['OGid'], int(fields['start']), int(fields['stop']), fields['disorder'] == 'True'
+        node_id = int(fields['node_id'])
+        id2ids[node_id] = (OGid, start, stop, disorder)
+
 if not os.path.exists('out/'):
     os.mkdir('out/')
 
@@ -152,18 +162,16 @@ gridspec_kw = {'width_ratios': [0.1, 0.65, 0.25], 'wspace': 0,
                'height_ratios': [0.975, 0.025], 'hspace': 0.01,
                'left': 0.05, 'right': 0.95, 'top': 0.95, 'bottom': 0.125}
 
+row_labels = []
+for node_id, ids in sorted(id2ids.items()):
+    row_labels.append(ids)
 column_labels = []
 for group_label in group_labels:
     column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
-data = models.loc[pdidx[:, :, :, True], column_labels]  # Re-arrange columns
+data = models.loc[row_labels, column_labels]  # Re-arrange rows and columns
 array = np.nan_to_num(data.to_numpy(), nan=1)
 
-cdm = pdist(array, metric='correlation')
-lm = linkage(cdm, method='average')
-
-# Convert to tree and calculate some useful data structures
-tree = make_tree(lm)
-tip_order = [int(tip.name) for tip in tree.tips()]
+# Calculate some useful data structures
 cluster_nodes = set()
 node2root = {}
 for root_id, _, _ in clusters:
@@ -203,7 +211,7 @@ for spine in ax.spines.values():
 
 # Heatmap
 ax = axs[0, 1]
-im = ax.imshow(array[tip_order], aspect='auto', cmap=plt.colormaps['inferno'], interpolation='none')
+im = ax.imshow(array, aspect='auto', cmap=plt.colormaps['inferno'], interpolation='none')
 ax.xaxis.set_label_position('top')
 ax.set_xlabel('Features')
 ax.set_xticks([])
