@@ -264,7 +264,7 @@ width = 0.2
 ycenter = gridspec_kw['bottom'] / 2
 height = 0.015
 cax = fig.add_axes((xcenter - width / 2, ycenter - height / 2, width, height))
-cax.set_title('$\mathregular{\log L_{OU} / L_{BM}}$', fontdict={'fontsize': 10})
+cax.set_title('$\mathregular{\log L_{OU} / L_{BM}}$', fontsize=10)
 fig.colorbar(im, cax=cax, orientation='horizontal')
 
 fig.savefig('out/hierarchy.png', dpi=600)
