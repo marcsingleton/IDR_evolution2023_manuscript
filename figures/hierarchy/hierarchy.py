@@ -56,7 +56,6 @@ clusters = [('15126', '1', ''),
             ('15026', '38', ''),
             ('15102', '39', '')]
 
-color1 = '#4e79a7'
 
 # Load regions
 rows = []
@@ -127,6 +126,7 @@ if not os.path.exists('out/'):
 fig = plt.figure(figsize=(7.5, 3))
 gs = plt.GridSpec(1, 2)
 rect = (0.15, 0.25, 0.825, 0.7)
+color1 = '#4e79a7'
 
 subfig = fig.add_subfigure(gs[0, 0], facecolor='none')
 ax = subfig.add_axes(rect)
