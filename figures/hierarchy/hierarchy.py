@@ -157,9 +157,9 @@ legend_args = {'aa_group': ('Amino acid content', 'grey', ''),
                'complexity_group': ('Repeats and complexity', 'white', 4 * '.'),
                'motifs_group': ('Motifs', 'white', 4 * '\\')}
 group_labels = ['aa_group', 'charge_group', 'physchem_group', 'complexity_group', 'motifs_group']
-gridspec_kw = {'width_ratios': [0.1, 0.65, 0.25], 'wspace': 0,
+gridspec_kw = {'width_ratios': [0.1, 0.85, 0.1], 'wspace': 0,
                'height_ratios': [0.975, 0.025], 'hspace': 0.01,
-               'left': 0.05, 'right': 0.95, 'top': 0.95, 'bottom': 0.125}
+               'left': 0.05, 'right': 0.99, 'top': 0.95, 'bottom': 0.15}
 
 row_labels = []
 for node in tree.tips():
@@ -196,7 +196,7 @@ for node in tree.postorder():
         cmap = plt.colormaps['Greys_r']
     node2color[node] = cmap(max(0., (11 - tips) / 10))
 
-fig, axs = plt.subplots(2, 3, figsize=(7.5, 7.5), gridspec_kw=gridspec_kw)
+fig, axs = plt.subplots(2, 3, figsize=(5.2, 6), gridspec_kw=gridspec_kw)
 
 # Tree
 ax = axs[0, 0]
@@ -231,14 +231,13 @@ for root_id, cluster_id in clusters:
     tips = list(root_node.tips())
     upper_idx = id2idx[tips[0].name]
     lower_idx = id2idx[tips[-1].name]
-    if len(tips) < 50:
+    if len(tips) < 75:
         continue
 
     rect = plt.Rectangle((0.05, upper_idx), 0.2, lower_idx - upper_idx, facecolor='white',
-                         edgecolor='black', linewidth=1, clip_on=False)
+                         edgecolor='black', linewidth=0.5, clip_on=False)
     ax.add_patch(rect)
-    ax.text(0.325, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize='xx-small', fontweight='bold')
-    ax.text(0.4, (upper_idx + lower_idx) / 2, cluster_label, va='center_baseline', fontsize='xx-small')
+    ax.text(0.45, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize=6)
 ax.sharey(axs[0, 1])
 ax.set_axis_off()
 
