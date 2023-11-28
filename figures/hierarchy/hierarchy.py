@@ -163,8 +163,8 @@ gridspec_kw = {'width_ratios': [0.1, 0.65, 0.25], 'wspace': 0,
                'left': 0.05, 'right': 0.95, 'top': 0.95, 'bottom': 0.125}
 
 row_labels = []
-for node_id, ids in sorted(id2ids.items()):
-    row_labels.append(ids)
+for node in tree.tips():
+    row_labels.append(id2ids[int(node.name)])
 column_labels = []
 for group_label in group_labels:
     column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
