@@ -21,8 +21,8 @@ tip_order = {tip.name: i for i, tip in enumerate(tree_template.tips())}
 
 clusters = [('15056', '12'),
             ('14889', '15'),
-            ('15146', '23'),
-            ('14741', '24')]
+            ('14741', '23'),
+            ('14379', '24')]
 
 # Load regions as segments
 rows = []
