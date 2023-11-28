@@ -156,7 +156,7 @@ legend_args = {'aa_group': ('Amino acid content', 'grey', ''),
                'physchem_group': ('Physiochemical properties', 'white', ''),
                'complexity_group': ('Repeats and complexity', 'white', 4 * '.'),
                'motifs_group': ('Motifs', 'white', 4 * '\\')}
-group_labels = ['aa_group', 'charge_group', 'motifs_group', 'physchem_group', 'complexity_group']
+group_labels = ['aa_group', 'charge_group', 'physchem_group', 'complexity_group', 'motifs_group']
 group_labels_nonmotif = ['aa_group', 'charge_group', 'physchem_group', 'complexity_group']
 gridspec_kw = {'width_ratios': [0.1, 0.65, 0.25], 'wspace': 0,
                'height_ratios': [0.975, 0.025], 'hspace': 0.01,
