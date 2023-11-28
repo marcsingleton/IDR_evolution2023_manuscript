@@ -1,6 +1,7 @@
 """Plot individual clusters with features."""
 
 import os
+from string import ascii_uppercase
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,17 +25,16 @@ clusters = [('15056', '12'),
             ('14741', '23'),
             ('14379', '24')]
 
-# Load regions as segments
+# Load regions
 rows = []
 with open(f'../../IDR_evolution/analysis/IDRpred/region_filter/out/regions_{min_length}.tsv') as file:
     field_names = file.readline().rstrip('\n').split('\t')
     for line in file:
         fields = {key: value for key, value in zip(field_names, line.rstrip('\n').split('\t'))}
-        OGid, start, stop, disorder = fields['OGid'], int(fields['start']), int(fields['stop']), fields['disorder'] == 'True'
-        for ppid in fields['ppids'].split(','):
-            rows.append({'OGid': OGid, 'start': start, 'stop': stop, 'disorder': disorder, 'ppid': ppid})
-all_segments = pd.DataFrame(rows)
-all_regions = all_segments.drop('ppid', axis=1).drop_duplicates()
+        OGid, start, stop, disorder = fields['OGid'], int(fields['start']), int(fields['stop']), fields[
+                                                                                                     'disorder'] == 'True'
+        rows.append({'OGid': OGid, 'start': start, 'stop': stop, 'disorder': disorder})
+all_regions = pd.DataFrame(rows)
 
 # Filter by rates
 asr_rates = pd.read_table(f'../../IDR_evolution/analysis/evofit/asr_stats/out/regions_{min_length}/rates.tsv')
@@ -93,15 +93,20 @@ if not os.path.exists(prefix):
     os.mkdir(prefix)
 
 group_labels = ['aa_group', 'charge_group', 'physchem_group', 'complexity_group', 'motifs_group']
+gridspec_kw = {'left': 0.025, 'right': 0.995, 'bottom': 0.375, 'top': 0.85, 'hspace': 0}
+cmap = plt.colormaps['RdBu']
+cmap.set_under((1.0, 0.0, 1.0))
+cmap.set_over((0.0, 1.0, 1.0))
 
-for root_id, cluster_id in clusters:
-    fig = plt.figure(figsize=(7.5, 7))
-    gs = plt.GridSpec(3, 1)
-    gridspec_kw = {'left': 0.025, 'right': 0.995, 'bottom': 0.35, 'top': 0.825}
-    cmap = plt.colormaps['RdBu']
-    cmap.set_under((1.0, 0.0, 1.0, 1.0))
-    cmap.set_over((0.0, 1.0, 1.0, 1.0))
+column_labels = []
+for group_label in group_labels:
+    column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
+array = models[column_labels].to_numpy()
+vmin, vmax = array.min(), array.max()
 
+fig = plt.figure(figsize=(7.5, 8.75))
+gs = plt.GridSpec(len(clusters), 1)
+for idx, (root_id, cluster_id) in enumerate(clusters):
     row_labels = []
     for node in tree_cluster.find(root_id).tips():
         row_labels.append(id2ids[int(node.name)])
@@ -109,29 +114,26 @@ for root_id, cluster_id in clusters:
     for group_label in group_labels:
         xs_labels.extend(feature_groups[group_label])
 
-    # --- PANEL A: delta loglikelihood heatmap ---
+    # --- SUBPANEL 1: delta loglikelihood heatmap ---
     column_labels = []
     for group_label in group_labels:
         column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
     data = models.loc[row_labels, column_labels]  # Re-arrange rows and columns
     array = np.nan_to_num(data.to_numpy(), nan=1)
 
-    subfig = fig.add_subfigure(gs[0])
-    ax = subfig.subplots(gridspec_kw=gridspec_kw)
-    im = ax.imshow(array, aspect='auto', cmap=plt.colormaps['inferno'], interpolation='none')
-    ax.set_xticks(range(len(xs_labels)), xs_labels, fontsize=5.5,
-                  rotation=60, rotation_mode='anchor', ha='right', va='center')
-    ax.set_yticks([])
-    ax.text(0, 1.05, f'Cluster {cluster_id}: ' + '$\mathregular{\log L_{OU} / L_{BM}}$',
-            fontsize=10, transform=ax.transAxes)
+    subfig = fig.add_subfigure(gs[idx])
+    axs = subfig.subplots(2, 1, gridspec_kw=gridspec_kw)
+
+    ax = axs[0]
+    im0 = ax.imshow(array, aspect='auto', cmap=plt.colormaps['inferno'], interpolation='none',
+                    vmin=vmin, vmax=vmax)
+    ax.yaxis.set_visible(False)
+    ax.xaxis.set_visible(False)
+    ax.text(0, 1.05, f'Cluster {cluster_id}', fontsize=8, transform=ax.transAxes)
     for spine in ax.spines.values():
         spine.set_visible(False)
-    cax = ax.inset_axes((0.85, 1.05, 0.15, 0.08))
-    cbar = subfig.colorbar(im, cax=cax, orientation='horizontal', ticklocation='top')
-    cax.tick_params(labelsize=8, pad=1)
-    subfig.suptitle('A', x=0.025, y=0.975, fontweight='bold')
 
-    # --- PANEL B: feature heatmap ---
+    # --- SUBPANEL 2: feature heatmap ---
     column_labels = []
     for group_label in group_labels:
         column_labels.extend([f'{feature_label}_mu_BM' for feature_label in feature_groups[group_label]])
@@ -139,26 +141,29 @@ for root_id, cluster_id in clusters:
     data = (data - models[column_labels].mean(axis=0)) / models[column_labels].std(axis=0)
     array = np.nan_to_num(data.to_numpy(), nan=1)
 
-    subfig = fig.add_subfigure(gs[1])
-    ax = subfig.subplots(gridspec_kw=gridspec_kw)
-    im = ax.imshow(array, aspect='auto', cmap=cmap, interpolation='none',
-                   vmin=-3, vmax=3)
+    ax = axs[1]
+    im1 = ax.imshow(array, aspect='auto', cmap=cmap, interpolation='none',
+                    vmin=-3, vmax=3)
     ax.set_xticks(range(len(xs_labels)), xs_labels, fontsize=5.5,
                   rotation=60, rotation_mode='anchor', ha='right', va='center')
     ax.set_yticks([])
-    ax.text(0, 1.05, f'Cluster {cluster_id}: ' + '$z$-score of $\mathregular{\mu_{BM}}$',
-            fontsize=10, transform=ax.transAxes)
     for spine in ax.spines.values():
         spine.set_visible(False)
-    cax = ax.inset_axes((0.85, 1.05, 0.15, 0.08))
-    cbar = subfig.colorbar(im, cax=cax, orientation='horizontal', ticklocation='top')
-    cax.tick_params(labelsize=8, pad=1)
-    subfig.suptitle('B', x=0.025, y=0.975, fontweight='bold')
 
-    # --- PANEL C: alignment ---
-    subfig = fig.add_subfigure(gs[2])
-    subfig.suptitle('C', x=0.025, y=0.975, fontweight='bold')
+    # --- COLORBARS ---
+    ax = axs[0]
+    cax = ax.inset_axes((0.65, 1.25, 0.15, 0.1))
+    cbar = subfig.colorbar(im0, cax=cax, orientation='horizontal')
+    cax.set_title('$\mathregular{\log L_{OU} / L_{BM}}$', fontsize=8, pad=1)
+    cax.tick_params(labelsize=5.5, pad=1, length=2)
+    cax = ax.inset_axes((0.85, 1.25, 0.15, 0.1))
+    subfig.colorbar(im1, cax=cax, orientation='horizontal',
+                    extend='both', extendrect=True, extendfrac=0.03)
+    cax.set_title('$z$-score of $\mathregular{\mu_{BM}}$', fontsize=8, pad=1)
+    cax.tick_params(labelsize=5.5, pad=1, length=2)
 
-    fig.savefig(f'out/cluster_{cluster_id}.png', dpi=300)
-    fig.savefig(f'out/cluster_{cluster_id}.tiff', dpi=300)
-    plt.close()
+    subfig.suptitle(ascii_uppercase[idx], x=0.0125, y=0.975, fontweight='bold')
+
+fig.savefig('out/clusters.png', dpi=300)
+fig.savefig('out/clusters.tiff', dpi=300)
+plt.close()
