@@ -16,46 +16,45 @@ min_indel_columns = 5  # Indel rates below this value are set to 0
 min_aa_rate = 1
 min_indel_rate = 0.1
 
-clusters = [('15126', '1', ''),
-            ('15136', '2', ''),
-            ('15107', '3', ''),
-            ('15065', '4', ''),
-            ('14930', '5', ''),
-            ('14935', '6', ''),
-            ('14890', '7', ''),
-            ('14971', '8', ''),
-            ('15086', '9', ''),
-            ('14939', '10', ''),
-            ('15104', '11', ''),
-            ('15056', '12', ''),
-            ('15100', '13', ''),
-            ('15132', '14', ''),
-            ('14889', '15', ''),
-            ('15134', '16', ''),
-            ('15053', '17', ''),
-            ('15072', '18', ''),
-            ('14948', '19', ''),
-            ('15081', '20', ''),
-            ('14731', '21', ''),
-            ('15146', '22', ''),
-            ('14741', '23', ''),
-            ('14379', '24', ''),
-            ('14944', '25', ''),
-            ('15083', '26', ''),
-            ('14988', '27', ''),
-            ('15165', '28', ''),
-            ('15123', '29', ''),
-            ('14743', '30', ''),
-            ('15098', '31', ''),
-            ('15153', '32', ''),
-            ('15035', '33', ''),
-            ('15062', '34', ''),
-            ('15159', '35', ''),
-            ('15047', '36', ''),
-            ('14916', '37', ''),
-            ('15026', '38', ''),
-            ('15102', '39', '')]
-
+clusters = [('15126', '1'),
+            ('15136', '2'),
+            ('15107', '3'),
+            ('15065', '4'),
+            ('14930', '5'),
+            ('14935', '6'),
+            ('14890', '7'),
+            ('14971', '8'),
+            ('15086', '9'),
+            ('14939', '10'),
+            ('15104', '11'),
+            ('15056', '12'),
+            ('15100', '13'),
+            ('15132', '14'),
+            ('14889', '15'),
+            ('15134', '16'),
+            ('15053', '17'),
+            ('15072', '18'),
+            ('14948', '19'),
+            ('15081', '20'),
+            ('14731', '21'),
+            ('15146', '22'),
+            ('14741', '23'),
+            ('14379', '24'),
+            ('14944', '25'),
+            ('15083', '26'),
+            ('14988', '27'),
+            ('15165', '28'),
+            ('15123', '29'),
+            ('14743', '30'),
+            ('15098', '31'),
+            ('15153', '32'),
+            ('15035', '33'),
+            ('15062', '34'),
+            ('15159', '35'),
+            ('15047', '36'),
+            ('14916', '37'),
+            ('15026', '38'),
+            ('15102', '39')]
 
 # Load regions
 rows = []
@@ -175,7 +174,7 @@ array = np.nan_to_num(data.to_numpy(), nan=1)
 # Calculate some useful data structures
 cluster_nodes = set()
 node2root = {}
-for root_id, _, _ in clusters:
+for root_id, _ in clusters:
     root_node = tree.find(root_id)
     for node in root_node.traverse():
         cluster_nodes.add(node)
@@ -183,7 +182,7 @@ for root_id, _, _ in clusters:
 
 # Get branch colors
 cmaps = [plt.colormaps[name] for name in ['Blues_r', 'Oranges_r', 'Greens_r', 'Reds_r', 'Purples_r']]
-id2color = {root_id: cmaps[i % len(cmaps)] for i, (root_id, _, _) in enumerate(clusters)}
+id2color = {root_id: cmaps[i % len(cmaps)] for i, (root_id, _) in enumerate(clusters)}
 node2color, node2tips = {}, {}
 for node in tree.postorder():
     if node.is_tip():
@@ -227,7 +226,7 @@ for ax in [axs[1, 0], axs[1, 2]]:
 # Cluster blocks
 ax = axs[0, 2]
 id2idx = {tip.name: idx for idx, tip in enumerate(tree.tips())}
-for root_id, cluster_id, cluster_label in clusters:
+for root_id, cluster_id in clusters:
     root_node = tree.find(root_id)
     tips = list(root_node.tips())
     upper_idx = id2idx[tips[0].name]
