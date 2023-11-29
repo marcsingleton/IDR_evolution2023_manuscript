@@ -179,7 +179,10 @@ The authors declare no conflicts of interest.
 \includegraphics[width=\textwidth]{substitution/out/substitution.png}
 \centering
 \caption{\textbf{Amino acid substitution models fit to disorder and order regions.}
-\textbf{(A)} Amino acid frequencies of substitution models. Amino acid symbols are ordered by their enrichment in disorder regions, calculated as the disorder-to-order ratio of their frequencies. Error bars represent standard deviations over models fit to different meta-alignments ($n = 25$). \textbf{(B-C)} Exchangeability coefficients of disorder and order regions, respectively, averaged over meta-alignments. \textbf{(D)} $\log_{10}$ disorder-to-order ratios of exchangeability coefficients. \textbf{(E-F)} Rate coefficients of disorder and order regions, respectively, averaged over meta-alignments. The vertical and horizontal axes indicate the initial and target amino acids, respectively. \textbf{(G)} $\log_{10}$ disorder-to-order ratios of rate coefficients.}
+\textbf{(A)} Amino acid frequencies of substitution models. Amino acid symbols are ordered by their enrichment in disorder regions, calculated as the disorder-to-order ratio of their frequencies. Error bars represent standard deviations over models fit to different meta-alignments ($n = 25$).
+\textbf{(B-C)} Exchangeability coefficients of disorder and order regions, respectively, averaged over meta-alignments. \textbf{(D)} $\log_{10}$ disorder-to-order ratios of exchangeability coefficients.
+\textbf{(E-F)} Rate coefficients of disorder and order regions, respectively, averaged over meta-alignments. The vertical and horizontal axes indicate the initial and target amino acids, respectively.
+\textbf{(G)} $\log_{10}$ disorder-to-order ratios of rate coefficients.}
 \label{fig:substitution}
 \end{figure}
 
@@ -187,7 +190,10 @@ The authors declare no conflicts of interest.
 \includegraphics[width=\textwidth]{scores/out/scores_07E3.png}
 \centering
 \caption{\textbf{Analyses of disorder scores.}
-\textbf{(A)} Example region in the alignment of the sequences in orthologous group 07E3 with their corresponding disorder scores. Higher scores indicate a higher probability of intrinsic disorder. Disorder score traces are colored by the position of their associated species on the phylogenetic tree. \textbf{(B)} Correlations between disorder scores and feature contrasts in regions. Asterisks indicate statistically significant correlations as computed by permutation tests ($p < 0.001$). \textbf{(C-D)} Example scatter plots showing correlations given in panel B. \textbf{(E)} GO term analysis of regions with rapidly evolving disorder scores. Only terms where $p < 0.001$ are shown.}
+\textbf{(A)} Example region in the alignment of the sequences in orthologous group 07E3 with their corresponding disorder scores. Higher scores indicate a higher probability of intrinsic disorder. Disorder score traces are colored by the position of their associated species on the phylogenetic tree.
+\textbf{(B)} Correlations between disorder scores and feature contrasts in regions. Asterisks indicate statistically significant correlations as computed by permutation tests ($p < 0.001$).
+\textbf{(C-D)} Example scatter plots showing correlations given in panel B.
+\textbf{(E)} GO term analysis of regions with rapidly evolving disorder scores. Only terms where $p < 0.001$ are shown.}
 \label{fig:scores}
 \end{figure}
 
@@ -195,7 +201,11 @@ The authors declare no conflicts of interest.
 \includegraphics[width=\textwidth]{brownian/out/rate.png}
 \centering
 \caption{\textbf{PCA of disorder regions' feature rates.}
-\textbf{(A)} The first two PCs of the disorder regions' feature rate distributions. The explained variance percentage of each component is indicated in parentheses. \textbf{(B)} Scatter plot of the disorder regions' feature rates along the first PC against the sum of the average amino acid and indel substitution rates in those regions. \textbf{(C)} The second and third PCs of the disorder regions' feature rate distributions. The explained variance percentage of each component is indicated in parentheses in the axis labels. \textbf{(D)} The same plot as panel C with the projections of original variables onto the components shown as arrows. Only the 16 features with the largest projections are shown. Scaling of the arrows is arbitrary. \textbf{(E-F)} Example alignments of disorder regions from the orthologous groups 0A8A, 3139, 04B0, respectively. The colored bars on the left indicate the hexbin containing that region in panel C.}
+\textbf{(A)} The first two PCs of the disorder regions' feature rate distributions. The explained variance percentage of each component is indicated in parentheses.
+\textbf{(B)} Scatter plot of the disorder regions' feature rates along the first PC against the sum of the average amino acid and indel substitution rates in those regions.
+\textbf{(C)} The second and third PCs of the disorder regions' feature rate distributions. The explained variance percentage of each component is indicated in parentheses in the axis labels.
+\textbf{(D)} The same plot as panel C with the projections of original variables onto the components shown as arrows. Only the 16 features with the largest projections are shown. Scaling of the arrows is arbitrary.
+\textbf{(E-F)} Example alignments of disorder regions from the orthologous groups 0A8A, 3139, 04B0, respectively. The colored bars on the left indicate the hexbin containing that region in panel C.}
 \label{fig:rate}
 \end{figure}
 
@@ -203,7 +213,12 @@ The authors declare no conflicts of interest.
 \includegraphics[width=\textwidth]{simulation/out/simulation.png}
 \centering
 \caption{\textbf{Hypothesis testing statistics under simulated BM and OU models.}
-\textbf{(A)} Violin plots of the estimated rates as a function of the true rates ($\sigma^2_{BM}$) under the BM model. \textbf{(B)} $\log_{10}$ ratio of the mean estimated rate over its true value as a function of the true rates ($\sigma^2_{OU}$) and selection strengths ($\alpha$). \textbf{(C)} $\log_{10}$ ratio of the mean estimated selection strength over its true value as a function of the true rates ($\sigma^2_{OU}$) and selection strengths ($\alpha$). \textbf{(D)} The probability of incorrectly rejecting the BM model in favor of the OU model (type I error) as a function of a given critical value of the log likelihood ratio. Each line indicates a different value of the true rate under the BM model. \textbf{(E)} Type I error as a function of a given critical value as in panel D but with all simulations under different values of the true rate combined into a single data set. \textbf{(F)} The probability of incorrectly failing to reject the BM model in favor of the OU model (type II error) as a function of the true rates ($\sigma^2_{OU}$) and selection strengths ($\alpha$). The probabilities were calculated using the critical value obtained from the empirical 1\% type I error rate shown in panel E.}
+\textbf{(A)} Violin plots of the estimated rates as a function of the true rates ($\sigma^2_{BM}$) under the BM model.
+\textbf{(B)} $\log_{10}$ ratio of the mean estimated rate over its true value as a function of the true rates ($\sigma^2_{OU}$) and selection strengths ($\alpha$).
+\textbf{(C)} $\log_{10}$ ratio of the mean estimated selection strength over its true value as a function of the true rates ($\sigma^2_{OU}$) and selection strengths ($\alpha$).
+\textbf{(D)} The probability of incorrectly rejecting the BM model in favor of the OU model (type I error) as a function of a given critical value of the log likelihood ratio. Each line indicates a different value of the true rate under the BM model.
+\textbf{(E)} Type I error as a function of a given critical value as in panel D but with all simulations under different values of the true rate combined into a single data set.
+\textbf{(F)} The probability of incorrectly failing to reject the BM model in favor of the OU model (type II error) as a function of the true rates ($\sigma^2_{OU}$) and selection strengths ($\alpha$). The probabilities were calculated using the critical value obtained from the empirical 1\% type I error rate shown in panel E.}
 \label{fig:simulation}
 \end{figure}
 
@@ -211,7 +226,8 @@ The authors declare no conflicts of interest.
 \includegraphics[width=\textwidth]{conserved/out/conserved.png}
 \centering
 \caption{\textbf{Distributions of significant features in regions.}
-\textbf{(A)} Fraction of regions with significant likelihood ratios for each feature under 1 and 5\% type I error rates. \textbf{(B)} Distribution of number of features with significant likelihood ratios under 1 (left) and 5\% type I error rates. The random distributions were computed by randomly shuffling the observed likelihood ratios between regions for each feature independently.}
+\textbf{(A)} Fraction of regions with significant likelihood ratios for each feature under 1 and 5\% type I error rates.
+\textbf{(B)} Distribution of number of features with significant likelihood ratios under 1 (left) and 5\% type I error rates. The random distributions were computed by randomly shuffling the observed likelihood ratios between regions for each feature independently.}
 \label{fig:conserved}
 \end{figure}
 
