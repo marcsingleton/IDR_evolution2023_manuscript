@@ -181,7 +181,7 @@ plot_msa_kwargs = {'left': 0.14, 'right': 0.85, 'top': 0.925, 'bottom': 0.15, 'a
                                      'handletextpad': 0.5, 'markerscale': 0.75, 'handlelength': 1},
                    **plot_msa_kwargs_common}
 
-plots = [('glutamine', ['fraction_Q', 'repeat_Q'],
+plots = [('glutamine', ['fraction_Q', 'repeat_QN'],
           {('03BB', 361, 519, True): {'color': 'C2', 'index': 0},
            ('0715', 66, 251, True): {'color': 'C3', 'index': 1}}),
          ('SCD', ['SCD', 'NCPR'],
