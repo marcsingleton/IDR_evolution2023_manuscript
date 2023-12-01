@@ -1,6 +1,7 @@
 """Plot individual clusters with features."""
 
 import os
+from math import ceil
 from string import ascii_uppercase
 
 import matplotlib.pyplot as plt
@@ -104,6 +105,7 @@ for group_label in group_labels:
 array = models[column_labels].to_numpy()
 vmin, vmax = array.min(), array.max()
 
+# === MAIN CLUSTER FIGURE ===
 fig = plt.figure(figsize=(7.5, 8.75))
 gs = plt.GridSpec(len(clusters), 1)
 for idx, (root_id, cluster_id) in enumerate(clusters):
@@ -167,3 +169,39 @@ for idx, (root_id, cluster_id) in enumerate(clusters):
 fig.savefig('out/clusters.png', dpi=300)
 fig.savefig('out/clusters.tiff', dpi=300)
 plt.close()
+
+# === SUPPLEMENTAL SCATTER FIGURES ===
+plots = [('15', ['NCPR', 'net_charge', 'net_charge_P', 'SCD', 'isopoint']),
+         ('23', ['repeat_G', 'repeat_RG', 'repeat_FG']),
+         ('24', ['repeat_S', 'repeat_SG', 'repeat_SR'])]
+cluster2root = {root_id: cluster_id for cluster_id, root_id in clusters}
+for cluster_id, feature_labels in plots:
+    root_id = cluster2root[cluster_id]
+    row_labels = []
+    for node in tree_cluster.find(root_id).tips():
+        row_labels.append(id2ids[int(node.name)])
+
+    ncols = 3
+    d, m = divmod(len(feature_labels), ncols)
+    nrows = d + (1 if m > 0 else 0)
+
+    fig, axs = plt.subplots(nrows, ncols, figsize=(6.4, nrows*2.4), layout='constrained')
+    for ax, feature_label in zip(axs.ravel(), feature_labels):
+        column_label = f'{feature_label}_delta_loglikelihood'
+        data = models.loc[row_labels, column_label]   # Re-arrange rows and columns
+        xs = np.nan_to_num(data.to_numpy(), nan=1)
+
+        column_label = f'{feature_label}_mu_OU'
+        data = models.loc[row_labels, column_label]   # Re-arrange rows and columns
+        data = (data - models[column_label].mean()) / models[column_label].std()
+        ys = np.nan_to_num(data.to_numpy(), nan=1)
+
+        ax.scatter(xs, ys, s=10, alpha=0.75, edgecolor='none')
+        ax.set_xlabel('$\mathregular{\log L_{OU} / L_{BM}}$')
+        ax.set_ylabel('$z$-score of $\mathregular{\mu_{OU}}$')
+        ax.set_title(feature_label, fontsize=10)
+    for ax in axs.ravel()[len(feature_labels):]:
+        ax.set_visible(False)
+
+    fig.savefig(f'out/scatter_{cluster_id}.png', dpi=300)
+    fig.savefig(f'out/scatter_{cluster_id}.tiff', dpi=300)
