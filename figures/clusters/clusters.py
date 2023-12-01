@@ -136,7 +136,7 @@ for idx, (root_id, cluster_id) in enumerate(clusters):
     # --- SUBPANEL 2: feature heatmap ---
     column_labels = []
     for group_label in group_labels:
-        column_labels.extend([f'{feature_label}_mu_BM' for feature_label in feature_groups[group_label]])
+        column_labels.extend([f'{feature_label}_mu_OU' for feature_label in feature_groups[group_label]])
     data = models.loc[row_labels, column_labels]   # Re-arrange rows and columns
     data = (data - models[column_labels].mean(axis=0)) / models[column_labels].std(axis=0)
     array = np.nan_to_num(data.to_numpy(), nan=1)
@@ -159,7 +159,7 @@ for idx, (root_id, cluster_id) in enumerate(clusters):
     cax = ax.inset_axes((0.85, 1.25, 0.15, 0.1))
     subfig.colorbar(im1, cax=cax, orientation='horizontal',
                     extend='both', extendrect=True, extendfrac=0.03)
-    cax.set_title('$z$-score of $\mathregular{\mu_{BM}}$', fontsize=8, pad=1)
+    cax.set_title('$z$-score of $\mathregular{\mu_{OU}}$', fontsize=8, pad=1)
     cax.tick_params(labelsize=5.5, pad=1, length=2)
 
     subfig.suptitle(ascii_uppercase[idx], x=0.0125, y=0.975, fontweight='bold')
