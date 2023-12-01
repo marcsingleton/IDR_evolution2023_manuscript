@@ -191,7 +191,7 @@ plots = [('glutamine', ['fraction_Q', 'repeat_QN'],
           {('26A0', 187, 327, True): {'color': 'C2', 'index': 0},
            ('0102', 1452, 1603, True): {'color': 'C3', 'index': 1}})]
 for file_label, hexbin_features, records in plots:
-    fig_width, fig_height = 7.5, 8.5
+    fig_width, fig_height = 7.5, 8.25
     fig = plt.figure(figsize=(fig_width, fig_height))
     gs = plt.GridSpec(2*len(records)+1, 2, height_ratios=[1.5]+len(records)*[1, 1.5])
 
