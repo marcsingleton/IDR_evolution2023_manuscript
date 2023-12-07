@@ -2,7 +2,7 @@
 
 This is the repo for the IDR Evolution manuscript. It contains the formatting and text of the manuscript in the form of LaTeX files as well as the Python code used to generate the figures. To keep the presentation of data separate from their generation, this project was spun off from the main [IDR Evolution](https://github.com/marcsingleton/IDR_evolution2023) repo. The two, however, are closely linked, and updates to the organization and content of the main repo are ultimately reflected here as well. Accordingly, the figure generation code expects links to certain portions of the main repo, which is described in more detail in the Project Organization section.
 
-This project is under active development, but a pre-print should be posted before the close of 2023.
+A pre-print for this manuscript is now available on bioRxiv [here](https://www.biorxiv.org/content/10.1101/2023.12.05.570250v1)!
 
 ## Project Organization
 
