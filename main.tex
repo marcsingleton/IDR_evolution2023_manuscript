@@ -32,8 +32,15 @@
 
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
+\makeatletter  % Some magic to make the @ parse correctly when redefining the commands
+\renewcommand{\fnum@figure}{\thefigure\nobreakspace\figurename}
+\makeatother
+
 \setcounter{table}{0}
 \renewcommand{\thetable}{S\arabic{table}}
+\makeatletter  % Some magic to make the @ parse correctly when redefining the commands
+\renewcommand{\fnum@table}{\thetable\nobreakspace\tablename}
+\makeatother
 
 \clearpage
 \section*{Supporting information}
