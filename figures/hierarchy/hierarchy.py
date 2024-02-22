@@ -121,6 +121,29 @@ with open('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hier
 if not os.path.exists('out/'):
     os.mkdir('out/')
 
+# === ASR RATE FILTERS ===
+disorder = asr_rates.loc[asr_rates['disorder'], ['aa_rate_mean', 'indel_rate_mean']]
+aa_idx = disorder['aa_rate_mean'] > min_aa_rate
+indel_idx = disorder['indel_rate_mean'] > min_indel_rate
+
+output = f"""\
+# disorder regions: {len(disorder)}
+
+pass aa_rate filter
+#: {aa_idx.sum()}
+%: {aa_idx.sum() / len(disorder):.2f}
+
+pass indel_rate filter
+#: {indel_idx.sum()}
+%: {indel_idx.sum() / len(disorder):.2f}
+
+pass either filter
+#: {(aa_idx | indel_idx).sum()}
+%: {(aa_idx | indel_idx).sum() / len(disorder):.2f}
+"""
+with open('out/filters.txt', 'w') as file:
+    file.write(output)
+
 # === ASR RATE HISTOGRAM ===
 fig = plt.figure(figsize=(7.5, 3))
 gs = plt.GridSpec(1, 2)
