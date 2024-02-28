@@ -73,8 +73,8 @@ for label, record in records.items():
                             record.length)
 
 # === MAIN FIGURE ===
-plots = [(records['50R_disorder'], records['50R_order'], 'ematrix', 'exchangeability', 'B'),
-         (records['50R_disorder'], records['50R_order'], 'rmatrix', 'rate', 'C')]
+plots = [(records['50R_disorder'], records['50R_order'], 'ematrix', 'exchangeability'),
+         (records['50R_disorder'], records['50R_order'], 'rmatrix', 'rate')]
 
 fig = plt.figure(figsize=(7.5, 6.25))
 gs = plt.GridSpec(1 + len(plots), 3)
@@ -98,7 +98,7 @@ subfig.suptitle('A', x=0.0125, y=0.975, fontweight='bold')  # Half usual value b
 
 panel_labels = ['B', 'C', 'D', 'E', 'F', 'G']
 for gs_idx, plot in enumerate(plots):
-    record1, record2, data_label, title_label, panel_label = plot
+    record1, record2, data_label, title_label = plot
     matrix1 = getattr(record1, data_label).mean(axis=0)
     matrix2 = getattr(record2, data_label).mean(axis=0)
     vmax = max(matrix1.max(), matrix2.max())
@@ -110,6 +110,7 @@ for gs_idx, plot in enumerate(plots):
     im = ax.imshow(matrix1, vmin=0, vmax=vmax, cmap='Greys')
     ax.set_xticks(range(len(alphabet)), alphabet, fontsize=6)
     ax.set_yticks(range(len(alphabet)), alphabet, fontsize=6, ha='center')
+    ax.set_title(f'disorder {title_label}', fontsize=8, pad=3)
     subfig.colorbar(im, cax=ax.inset_axes((1.05, 0, 0.05, 1)))
     subfig.suptitle(panel_labels[3*gs_idx], x=0.0375, y=0.975, fontweight='bold')  # 1.5x because panel is third length
 
@@ -118,6 +119,7 @@ for gs_idx, plot in enumerate(plots):
     im = ax.imshow(matrix2, vmin=0, vmax=vmax, cmap='Greys')
     ax.set_xticks(range(len(alphabet)), alphabet, fontsize=6)
     ax.set_yticks(range(len(alphabet)), alphabet, fontsize=6, ha='center')
+    ax.set_title(f'order {title_label}', fontsize=8, pad=3)
     subfig.colorbar(im, cax=ax.inset_axes((1.05, 0, 0.05, 1)))
     subfig.suptitle(panel_labels[3*gs_idx+1], x=0.0375, y=0.975, fontweight='bold')  # 1.5x because panel is third length
 
@@ -126,6 +128,7 @@ for gs_idx, plot in enumerate(plots):
     im = ax.imshow(ratio, vmin=-vext, vmax=vext, cmap='RdBu')
     ax.set_xticks(range(len(alphabet)), alphabet, fontsize=6)
     ax.set_yticks(range(len(alphabet)), alphabet, fontsize=6, ha='center')
+    ax.set_title(f'{title_label} log ratio', fontsize=8, pad=3)
     subfig.colorbar(im, cax=ax.inset_axes((1.05, 0, 0.05, 1)))
     subfig.suptitle(panel_labels[3*gs_idx+2], x=0.0375, y=0.975, fontweight='bold')  # 1.5x because panel is third length
 fig.savefig('out/substitution.png', dpi=dpi)
