@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skbio
+from matplotlib.legend import Legend
 from matplotlib.lines import Line2D
 from matplotlib.patches import ArrowStyle
 from matplotlib.transforms import blended_transform_factory
@@ -297,6 +298,8 @@ for ids, params in records.items():
     set_bin_edge(ax, hb, bin_idx, 'none', params['color'], 1.5)
 
 # --- PANEL D ---
+pcx, pcy = 1, 2
+
 subfig = fig.add_subfigure(gs[1, 1])
 ax = subfig.add_axes(rectB)
 ax.hexbin(transform[:, pcx], transform[:, pcy], cmap=cmap, **hexbin_kwargs_log)
@@ -306,6 +309,45 @@ add_pca_arrows(ax, pca, data.columns, pcx, pcy,
                legend_kwargs=legend_kwargs,
                arrow_scale=arrow_scale, arrow_colors=arrow_colors, arrowstyle_kwargs=arrowstyle_kwargs)
 subfig.suptitle('D', x=0.025, y=0.975, fontweight='bold')
+
+# --- PANEL D EXTENSION: GROUP LEGEND ENTRIES AND ANNOTATE GROUPS ON AXES ---
+# Get legend handles and remove original legend
+legend = ax.get_legend()
+handles = legend.legendHandles
+legend.remove()
+
+# Set legend groupings manually which is simpler (if less flexible)
+handle_groups = [(handles[:3], 'glutamine'),
+                 (handles[3:10], 'charged'),
+                 (handles[10:], 'glycine')]
+
+# Add multiple legends by adding as artists
+# Legends are correctly spaced by tracking the bottoms of their bounding boxes
+ymax = 1
+legends = []
+for handles, name in handle_groups:
+    labels = [handle.get_label() for handle in handles]
+    legend = Legend(ax, handles=handles, labels=labels, title=name,
+                    loc='upper left', bbox_to_anchor=(1.025, ymax), borderpad=0.8, borderaxespad=0,
+                    fontsize=5.5, title_fontsize=6)
+    ax.add_artist(legend)
+
+    transform = ax.transAxes.inverted()
+    bbox = legend.get_window_extent(renderer=subfig.canvas.get_renderer())  # In display coordinates
+    bbox = transform.transform_bbox(bbox)  # In Axes coordinates
+    ymax = bbox.ymin
+    legends.append((legend, bbox))
+
+# Shift legends so they are centered as a whole
+center = 0.5 * (legends[0][1].ymax + legends[-1][1].ymin)
+offset = 0.5 - center
+for legend, bbox in legends:
+    legend.set_bbox_to_anchor((1.025, bbox.ymax + offset))
+
+# Add annotates to Axes
+ax.annotate('glutamine', (-12.5, 40), fontsize=8)
+ax.annotate('charged', (-20, -22.5), fontsize=8)
+ax.annotate('glycine', (20, -17.5), fontsize=8)
 
 # --- PANELS E - G ---
 for (OGid, start, stop), params in records.items():
@@ -459,7 +501,7 @@ fig.savefig('out/rate_variance.png', dpi=dpi)
 fig.savefig('out/rate_variance.tiff', dpi=dpi)
 
 """
-Here are some scratch work for ranking candidate regions.
+Here is some scratch work for ranking candidate regions.
 
 CHARGE
 ('0A8A', 1102, 1200) **
