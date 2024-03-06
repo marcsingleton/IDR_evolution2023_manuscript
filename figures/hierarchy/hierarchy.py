@@ -9,6 +9,19 @@ import skbio
 from matplotlib.patches import Patch, Rectangle
 from src.draw import plot_tree
 
+
+def get_id_map(path):
+    id2ids = {}
+    with open(path) as file:
+        field_names = file.readline().rstrip('\n').split('\t')
+        for line in file:
+            fields = {key: value for key, value in zip(field_names, line.rstrip('\n').split('\t'))}
+            OGid, start, stop, disorder = fields['OGid'], int(fields['start']), int(fields['stop']), fields['disorder'] == 'True'
+            node_id = int(fields['node_id'])
+            id2ids[node_id] = (OGid, start, stop, disorder)
+    return id2ids
+
+
 pdidx = pd.IndexSlice
 min_length = 30
 
@@ -106,17 +119,14 @@ for feature_label in feature_labels:
     columns[f'{feature_label}_delta_loglikelihood'] = models[f'{feature_label}_loglikelihood_OU'] - models[f'{feature_label}_loglikelihood_BM']
 models = pd.concat([models, pd.DataFrame(columns)], axis=1)
 
-# Load cluster tree
-tree = skbio.read('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_all_correlation.nwk',
-                  'newick', skbio.TreeNode)
-id2ids = {}
-with open('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_all_correlation.tsv') as file:
-    field_names = file.readline().rstrip('\n').split('\t')
-    for line in file:
-        fields = {key: value for key, value in zip(field_names, line.rstrip('\n').split('\t'))}
-        OGid, start, stop, disorder = fields['OGid'], int(fields['start']), int(fields['stop']), fields['disorder'] == 'True'
-        node_id = int(fields['node_id'])
-        id2ids[node_id] = (OGid, start, stop, disorder)
+# Load cluster trees
+tree_LR = skbio.read('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_delta_loglikelihood_all_correlation.nwk',
+                     'newick', skbio.TreeNode)
+id2ids_LR = get_id_map('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_delta_loglikelihood_all_correlation.tsv')
+
+tree_mu = skbio.read('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_mu_OU_all_correlation.nwk',
+                     'newick', skbio.TreeNode)
+id2ids_mu = get_id_map('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_mu_OU_all_correlation.tsv')
 
 if not os.path.exists('out/'):
     os.mkdir('out/')
@@ -179,115 +189,142 @@ legend_args = {'aa_group': ('Amino acid content', 'grey', ''),
                'physchem_group': ('Physiochemical properties', 'white', ''),
                'complexity_group': ('Repeats and complexity', 'white', 4 * '.'),
                'motifs_group': ('Motifs', 'white', 4 * '\\')}
-group_labels = ['aa_group', 'charge_group', 'physchem_group', 'complexity_group', 'motifs_group']
+metagroups = {'all': ['aa_group', 'charge_group', 'physchem_group', 'complexity_group', 'motifs_group'],
+              'nonmotif': ['aa_group', 'charge_group', 'physchem_group', 'complexity_group']}
 gridspec_kw = {'width_ratios': [0.1, 0.85, 0.1], 'wspace': 0,
                'height_ratios': [0.975, 0.025], 'hspace': 0.01,
                'left': 0.05, 'right': 0.99, 'top': 0.95, 'bottom': 0.15}
 
-row_labels = []
-for node in tree.tips():
-    row_labels.append(id2ids[int(node.name)])
+cmap = plt.colormaps['RdBu']
+cmap.set_under((1.0, 0.0, 1.0))
+cmap.set_over((0.0, 1.0, 1.0))
+heatmap_args = {'delta_loglikelihood': {'cmap': plt.colormaps['inferno']},
+                'mu_OU': {'cmap': cmap, 'vmin': -3, 'vmax': 3}}
+colorbar_labels = {'delta_loglikelihood': '$\mathregular{\log L_{OU} / L_{BM}}$',
+                   'mu_OU': '$z$-score of $\mathregular{\mu_{OU}}$'}
+colorbar_args = {'delta_loglikelihood': {},
+                 'mu_OU': {'extend': 'both', 'extendrect': True, 'extendfrac': 0.03}}
 
-column_labels = []
-for group_label in group_labels:
-    column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
-data = models.loc[row_labels, column_labels]  # Re-arrange rows and columns
-array = np.nan_to_num(data.to_numpy(), nan=1)
+# Make data sets
+data_set_parameters = [('delta_loglikelihood', 'all', tree_LR, id2ids_LR, False),
+                       ('mu_OU', 'all', tree_mu, id2ids_mu, True)]
+data_sets = {}
+for statistic_label, metagroup_label, tree, id2ids, normalize in data_set_parameters:
+    row_labels = []
+    for node in tree.tips():
+        row_labels.append(id2ids[int(node.name)])
 
-# Calculate some useful data structures
-cluster_nodes = set()
-node2root = {}
-for root_id, _ in clusters:
-    root_node = tree.find(root_id)
-    for node in root_node.traverse():
-        cluster_nodes.add(node)
-        node2root[node] = root_node
+    column_labels = []
+    for group_label in metagroups[metagroup_label]:
+        column_labels.extend([f'{feature_label}_delta_loglikelihood' for feature_label in feature_groups[group_label]])
+    data = models.loc[row_labels, column_labels]  # Re-arrange rows and columns
 
-# Get branch colors
-cmaps = [plt.colormaps[name] for name in ['Blues_r', 'Oranges_r', 'Greens_r', 'Reds_r', 'Purples_r']]
-id2color = {root_id: cmaps[i % len(cmaps)] for i, (root_id, _) in enumerate(clusters)}
-node2color, node2tips = {}, {}
-for node in tree.postorder():
-    if node.is_tip():
-        tips = 1
-    else:
-        tips = sum([node2tips[child] for child in node.children])
-    node2tips[node] = tips
-    if node in cluster_nodes:
-        cmap = id2color[node2root[node].name]
-    else:
-        cmap = plt.colormaps['Greys_r']
-    node2color[node] = cmap(max(0., (11 - tips) / 10))
+    if normalize:
+        data = (data - data.mean()) / data.std()
 
-fig, axs = plt.subplots(2, 3, figsize=(5.2, 6), gridspec_kw=gridspec_kw)
+    data_sets[f'{statistic_label}_{metagroup_label}'] = data
 
-# Tree
-ax = axs[0, 0]
-plot_tree(tree, ax=ax, linecolor=node2color, linewidth=0.2, tip_labels=False,
-          xmin_pad=0.025, xmax_pad=0)
-ax.sharey(axs[0, 1])
-ax.set_ylabel('Disorder regions')
-ax.set_xticks([])
-ax.set_yticks([])
-for spine in ax.spines.values():
-    spine.set_visible(False)
+# Make plots
+plots = [('delta_loglikelihood', 'all', tree_LR, clusters),
+         ('mu_OU', 'all', tree_mu, [])]
+for statistic_label, metagroup_label, tree, clusters in plots:
+    data = data_sets[f'{statistic_label}_{metagroup_label}']
+    array = np.nan_to_num(data.to_numpy(), nan=1)
 
-# Heatmap
-ax = axs[0, 1]
-im = ax.imshow(array, aspect='auto', cmap=plt.colormaps['inferno'], interpolation='none')
-ax.xaxis.set_label_position('top')
-ax.set_xlabel('Features')
-ax.set_xticks([])
-ax.set_yticks([])
-for spine in ax.spines.values():
-    spine.set_visible(False)
+    # Calculate some useful data structures
+    cluster_nodes = set()
+    node2root = {}
+    for root_id, _ in clusters:
+        root_node = tree.find(root_id)
+        for node in root_node.traverse():
+            cluster_nodes.add(node)
+            node2root[node] = root_node
 
-# Corner axes
-for ax in [axs[1, 0], axs[1, 2]]:
-    ax.set_visible(False)
+    # Get branch colors
+    cmaps = [plt.colormaps[name] for name in ['Blues_r', 'Oranges_r', 'Greens_r', 'Reds_r', 'Purples_r']]
+    id2color = {root_id: cmaps[i % len(cmaps)] for i, (root_id, _) in enumerate(clusters)}
+    node2color, node2tips = {}, {}
+    for node in tree.postorder():
+        if node.is_tip():
+            tips = 1
+        else:
+            tips = sum([node2tips[child] for child in node.children])
+        node2tips[node] = tips
+        if node in cluster_nodes:
+            cmap = id2color[node2root[node].name]
+        else:
+            cmap = plt.colormaps['Greys_r']
+        node2color[node] = cmap(max(0., (11 - tips) / 10))
 
-# Cluster blocks
-ax = axs[0, 2]
-id2idx = {tip.name: idx for idx, tip in enumerate(tree.tips())}
-for root_id, cluster_id in clusters:
-    root_node = tree.find(root_id)
-    tips = list(root_node.tips())
-    upper_idx = id2idx[tips[0].name]
-    lower_idx = id2idx[tips[-1].name]
-    if len(tips) < 75:
-        continue
+    fig, axs = plt.subplots(2, 3, figsize=(5.2, 6), gridspec_kw=gridspec_kw)
 
-    rect = plt.Rectangle((0.05, upper_idx), 0.2, lower_idx - upper_idx, facecolor='white',
-                         edgecolor='black', linewidth=0.5, clip_on=False)
-    ax.add_patch(rect)
-    ax.text(0.45, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize=6)
-ax.sharey(axs[0, 1])
-ax.set_axis_off()
+    # Tree
+    ax = axs[0, 0]
+    plot_tree(tree, ax=ax, linecolor=node2color, linewidth=0.2, tip_labels=False,
+              xmin_pad=0.025, xmax_pad=0)
+    ax.sharey(axs[0, 1])
+    ax.set_ylabel('Disorder regions')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
-# Legend
-ax = axs[1, 1]
-x = 0
-handles = []
-for group_label in group_labels:
-    label, color, hatch = legend_args[group_label]
-    dx = len(feature_groups[group_label]) / len(column_labels)
-    rect = Rectangle((x, 0), dx, 1, label=label, facecolor=color, hatch=hatch,
-                     edgecolor='black', linewidth=0.75, clip_on=False)
-    ax.add_patch(rect)
-    handles.append(rect)
-    x += dx
-ax.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.25, 0), fontsize=8)
-ax.set_axis_off()
+    # Heatmap
+    ax = axs[0, 1]
+    im = ax.imshow(array, aspect='auto', interpolation='none', **heatmap_args[statistic_label])
+    ax.xaxis.set_label_position('top')
+    ax.set_xlabel('Features')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
-# Colorbar
-xcenter = gridspec_kw['width_ratios'][0] + gridspec_kw['width_ratios'][1] * 0.75
-width = 0.2
-ycenter = gridspec_kw['bottom'] / 2
-height = 0.015
-cax = fig.add_axes((xcenter - width / 2, ycenter - height / 2, width, height))
-cax.set_title('$\mathregular{\log L_{OU} / L_{BM}}$', fontsize=10)
-fig.colorbar(im, cax=cax, orientation='horizontal')
+    # Corner axes
+    for ax in [axs[1, 0], axs[1, 2]]:
+        ax.set_visible(False)
 
-fig.savefig('out/hierarchy.png', dpi=600)
-fig.savefig('out/hierarchy.tiff', dpi=600)
-plt.close()
+    # Cluster blocks
+    ax = axs[0, 2]
+    id2idx = {tip.name: idx for idx, tip in enumerate(tree.tips())}
+    for root_id, cluster_id in clusters:
+        root_node = tree.find(root_id)
+        tips = list(root_node.tips())
+        upper_idx = id2idx[tips[0].name]
+        lower_idx = id2idx[tips[-1].name]
+        if len(tips) < 75:
+            continue
+
+        rect = plt.Rectangle((0.05, upper_idx), 0.2, lower_idx - upper_idx, facecolor='white',
+                             edgecolor='black', linewidth=0.5, clip_on=False)
+        ax.add_patch(rect)
+        ax.text(0.45, (upper_idx + lower_idx) / 2, cluster_id, va='center_baseline', ha='center', fontsize=6)
+    ax.sharey(axs[0, 1])
+    ax.set_axis_off()
+
+    # Legend
+    ax = axs[1, 1]
+    x = 0
+    handles = []
+    for group_label in metagroups[metagroup_label]:
+        label, color, hatch = legend_args[group_label]
+        dx = len(feature_groups[group_label]) / len(data.columns)
+        rect = Rectangle((x, 0), dx, 1, label=label, facecolor=color, hatch=hatch,
+                         edgecolor='black', linewidth=0.75, clip_on=False)
+        ax.add_patch(rect)
+        handles.append(rect)
+        x += dx
+    ax.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.25, 0), fontsize=8)
+    ax.set_axis_off()
+
+    # Colorbar
+    xcenter = gridspec_kw['width_ratios'][0] + gridspec_kw['width_ratios'][1] * 0.75
+    width = 0.2
+    ycenter = gridspec_kw['bottom'] / 2
+    height = 0.015
+    cax = fig.add_axes((xcenter - width / 2, ycenter - height / 2, width, height))
+    cax.set_title(colorbar_labels[statistic_label], fontsize=10)
+    fig.colorbar(im, cax=cax, orientation='horizontal', **colorbar_args[statistic_label])
+
+    fig.savefig(f'out/hierarchy_{statistic_label}.png', dpi=600)
+    fig.savefig(f'out/hierarchy_{statistic_label}.tiff', dpi=600)
+    plt.close()
