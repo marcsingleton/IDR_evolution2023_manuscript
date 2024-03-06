@@ -225,9 +225,11 @@ for statistic_label, metagroup_label, tree, id2ids, normalize in data_set_parame
     data_sets[f'{statistic_label}_{metagroup_label}'] = data
 
 # Make plots
-plots = [('delta_loglikelihood', 'all', tree_LR, clusters),
-         ('mu_OU', 'all', tree_mu, [])]
-for statistic_label, metagroup_label, tree, clusters in plots:
+# File labels are explicitly provided for backwards compatibility when generating different versions
+# The original plot has the same file name so the most recent version of the repo can properly generate PLOS_v1
+plots = [('delta_loglikelihood', 'all', 'hierarchy', tree_LR, clusters),
+         ('mu_OU', 'all', 'hierarchy_mu_OU', tree_mu, [])]
+for statistic_label, metagroup_label, file_label, tree, clusters in plots:
     data = data_sets[f'{statistic_label}_{metagroup_label}']
     array = np.nan_to_num(data.to_numpy(), nan=1)
 
@@ -325,6 +327,6 @@ for statistic_label, metagroup_label, tree, clusters in plots:
     cax.set_title(colorbar_labels[statistic_label], fontsize=10)
     fig.colorbar(im, cax=cax, orientation='horizontal', **colorbar_args[statistic_label])
 
-    fig.savefig(f'out/hierarchy_{statistic_label}.png', dpi=600)
-    fig.savefig(f'out/hierarchy_{statistic_label}.tiff', dpi=600)
+    fig.savefig(f'out/{file_label}.png', dpi=600)
+    fig.savefig(f'out/{file_label}.tiff', dpi=600)
     plt.close()
