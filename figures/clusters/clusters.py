@@ -1,7 +1,6 @@
 """Plot individual clusters with features."""
 
 import os
-from math import ceil
 from string import ascii_uppercase
 
 import matplotlib.pyplot as plt
