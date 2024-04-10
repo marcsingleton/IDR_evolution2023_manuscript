@@ -77,10 +77,10 @@ for feature_label in feature_labels:
 models = pd.concat([models, pd.DataFrame(columns)], axis=1)
 
 # Load cluster tree
-tree_cluster = skbio.read('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_all_correlation.nwk',
+tree_cluster = skbio.read('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_delta_loglikelihood_all_correlation.nwk',
                           'newick', skbio.TreeNode)
 id2ids = {}
-with open('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_all_correlation.tsv') as file:
+with open('../../IDR_evolution/analysis/brownian/model_stats/out/regions_30/hierarchy/heatmap_delta_loglikelihood_all_correlation.tsv') as file:
     field_names = file.readline().rstrip('\n').split('\t')
     for line in file:
         fields = {key: value for key, value in zip(field_names, line.rstrip('\n').split('\t'))}
